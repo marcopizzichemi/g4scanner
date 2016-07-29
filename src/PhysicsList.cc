@@ -25,10 +25,10 @@
 //
 // $Id$
 //
-/// \file g4matrixPhysicsList.cc
-/// \brief Implementation of the g4matrixPhysicsList class
+/// \file PhysicsList.cc
+/// \brief Implementation of the PhysicsList class
 
-#include "g4matrixPhysicsList.hh"
+#include "PhysicsList.hh"
 #include "G4SystemOfUnits.hh"
 #include "G4DecayPhysics.hh"
 #include "G4RadioactiveDecayPhysics.hh"
@@ -39,7 +39,7 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-g4matrixPhysicsList::g4matrixPhysicsList() : G4VModularPhysicsList(){
+PhysicsList::PhysicsList() : G4VModularPhysicsList(){
   SetVerboseLevel(1);
 
   // Default physics
@@ -71,13 +71,13 @@ g4matrixPhysicsList::g4matrixPhysicsList() : G4VModularPhysicsList(){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-g4matrixPhysicsList::~g4matrixPhysicsList()
+PhysicsList::~PhysicsList()
 { 
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void g4matrixPhysicsList::SetCuts()
+void PhysicsList::SetCuts()
 {
   G4VUserPhysicsList::SetCuts();
 }  

@@ -38,10 +38,10 @@
 #endif
 
 #include "G4UImanager.hh"
-#include "g4matrixPhysicsList.hh"
+#include "PhysicsList.hh"
 
-#include "g4matrixDetectorConstruction.hh"
-#include "g4matrixActionInitialization.hh"
+#include "DetectorConstruction.hh"
+#include "ActionInitialization.hh"
 
 #ifdef G4VIS_USE
 #include "G4VisExecutive.hh"
@@ -66,7 +66,7 @@
 namespace {
   void PrintUsage() {
     G4cerr << " Usage: " << G4endl;
-    G4cerr << " g4matrix [-m macro ] [-u UIsession] [-t nThreads] [-r seed] "
+    G4cerr << "  [-m macro ] [-u UIsession] [-t nThreads] [-r seed] "
            << G4endl;
     G4cerr << "   note: -t option is available only for multi-threaded mode."
            << G4endl;
@@ -83,7 +83,7 @@ int main(int argc,char** argv)
 
   if(argc<2) {
     G4cerr << " Usage: " << G4endl;
-    G4cerr << " g4matrix <config_file> [-m macro ] [-r seed] [-o output]" << G4endl;
+    G4cerr << "  <config_file> [-m macro ] [-r seed] [-o output]" << G4endl;
     G4cerr << "   note: -m -r -o options are optional" << G4endl;
     exit(0);
   }
@@ -383,70 +383,70 @@ int main(int argc,char** argv)
   CreateTree::Instance()->Seed = myseed;
   
   //create the detector construction
-  g4matrixDetectorConstruction* detector = new g4matrixDetectorConstruction();
+  DetectorConstruction* detector = new DetectorConstruction();
   
   //set the parameters of detector
-  ((g4matrixDetectorConstruction*)detector)->SetCrystalDimensions(crystalx,crystaly,crystalz);
-  ((g4matrixDetectorConstruction*)detector)->SetNumberOfCrystals(ncrystalx,ncrystaly);
-  ((g4matrixDetectorConstruction*)detector)->SetThinAirThickness(esrThickness);
-  ((g4matrixDetectorConstruction*)detector)->SetLateralEsr(lateralEsr);
-  ((g4matrixDetectorConstruction*)detector)->SetBackEsr(backEsr);
-  ((g4matrixDetectorConstruction*)detector)->SetGreaseFrontOne(greaseFront1);
-  ((g4matrixDetectorConstruction*)detector)->SetGreaseFrontTwo(greaseFront2);
-  ((g4matrixDetectorConstruction*)detector)->SetGlassFront(glassFront);
-  ((g4matrixDetectorConstruction*)detector)->SetEpoxy(epoxy);
-  ((g4matrixDetectorConstruction*)detector)->SetMppcDimensions(mppcx,mppcy,mppcz);
-  ((g4matrixDetectorConstruction*)detector)->SetMppcGap(mppcGap);
-  ((g4matrixDetectorConstruction*)detector)->SetNumberOfMPPC(nmppcx,nmppcy);
-  ((g4matrixDetectorConstruction*)detector)->SetGreaseBack(greaseBack);
-  ((g4matrixDetectorConstruction*)detector)->SetGlassBack(glassBack);
-  ((g4matrixDetectorConstruction*)detector)->SetAirBack(airBack);
-  ((g4matrixDetectorConstruction*)detector)->SetLightYield(lightyield);
-  ((g4matrixDetectorConstruction*)detector)->SetEsrGapX(esrgapx);
-  ((g4matrixDetectorConstruction*)detector)->SetEsrGapY(esrgapy);
-  ((g4matrixDetectorConstruction*)detector)->SetAirGap(airgap);
+  ((DetectorConstruction*)detector)->SetCrystalDimensions(crystalx,crystaly,crystalz);
+  ((DetectorConstruction*)detector)->SetNumberOfCrystals(ncrystalx,ncrystaly);
+  ((DetectorConstruction*)detector)->SetThinAirThickness(esrThickness);
+  ((DetectorConstruction*)detector)->SetLateralEsr(lateralEsr);
+  ((DetectorConstruction*)detector)->SetBackEsr(backEsr);
+  ((DetectorConstruction*)detector)->SetGreaseFrontOne(greaseFront1);
+  ((DetectorConstruction*)detector)->SetGreaseFrontTwo(greaseFront2);
+  ((DetectorConstruction*)detector)->SetGlassFront(glassFront);
+  ((DetectorConstruction*)detector)->SetEpoxy(epoxy);
+  ((DetectorConstruction*)detector)->SetMppcDimensions(mppcx,mppcy,mppcz);
+  ((DetectorConstruction*)detector)->SetMppcGap(mppcGap);
+  ((DetectorConstruction*)detector)->SetNumberOfMPPC(nmppcx,nmppcy);
+  ((DetectorConstruction*)detector)->SetGreaseBack(greaseBack);
+  ((DetectorConstruction*)detector)->SetGlassBack(glassBack);
+  ((DetectorConstruction*)detector)->SetAirBack(airBack);
+  ((DetectorConstruction*)detector)->SetLightYield(lightyield);
+  ((DetectorConstruction*)detector)->SetEsrGapX(esrgapx);
+  ((DetectorConstruction*)detector)->SetEsrGapY(esrgapy);
+  ((DetectorConstruction*)detector)->SetAirGap(airgap);
   
-  ((g4matrixDetectorConstruction*)detector)->SetLatDepoSideBySide(LatDepoSideBySide[0],LatDepoSideBySide[1],LatDepoSideBySide[2],LatDepoSideBySide[3]);
+  ((DetectorConstruction*)detector)->SetLatDepoSideBySide(LatDepoSideBySide[0],LatDepoSideBySide[1],LatDepoSideBySide[2],LatDepoSideBySide[3]);
   
-  ((g4matrixDetectorConstruction*)detector)->SetFastRiseTime(fastrisetime);
-  ((g4matrixDetectorConstruction*)detector)->SetFastDecayTime(fastdecaytime);
-  ((g4matrixDetectorConstruction*)detector)->SetFastRatio(fastratio);
-  ((g4matrixDetectorConstruction*)detector)->SetSlowRiseTime(slowrisetime);
-  ((g4matrixDetectorConstruction*)detector)->SetSlowDecayTime(slowdecaytime);
+  ((DetectorConstruction*)detector)->SetFastRiseTime(fastrisetime);
+  ((DetectorConstruction*)detector)->SetFastDecayTime(fastdecaytime);
+  ((DetectorConstruction*)detector)->SetFastRatio(fastratio);
+  ((DetectorConstruction*)detector)->SetSlowRiseTime(slowrisetime);
+  ((DetectorConstruction*)detector)->SetSlowDecayTime(slowdecaytime);
   
-  ((g4matrixDetectorConstruction*)detector)->SetFastEnergy(fastenergy);
-  ((g4matrixDetectorConstruction*)detector)->SetFastComponent(fastcomponent);
-  ((g4matrixDetectorConstruction*)detector)->SetSlowEnergy(slowenergy);
-  ((g4matrixDetectorConstruction*)detector)->SetSlowComponent(slowcomponent);
-  
-  
-//   ((g4matrixDetectorConstruction*)detector)->SetLateralDepolished(latdepolished);
-  ((g4matrixDetectorConstruction*)detector)->SetLateralSurfaceRoughness(latsurfaceroughness);
-  ((g4matrixDetectorConstruction*)detector)->SetLateralSurfaceSigmaAlpha(latsigmaalpha);
-  ((g4matrixDetectorConstruction*)detector)->SetLateralSurfaceSpecularLobe(latspecularlobe);
-  ((g4matrixDetectorConstruction*)detector)->SetLateralSurfaceSpecularSpike(latspecularspike);
-  ((g4matrixDetectorConstruction*)detector)->SetLateralSurfaceBackScattering(latbackscattering);
-  
-  ((g4matrixDetectorConstruction*)detector)->SetRealDepolished(realdepolished);
-  ((g4matrixDetectorConstruction*)detector)->SetRealSurfaceRoughness(realsurfaceroughness);
-  ((g4matrixDetectorConstruction*)detector)->SetRealSurfaceSigmaAlpha(realsigmaalpha);
-  ((g4matrixDetectorConstruction*)detector)->SetRealSurfaceSpecularLobe(realspecularlobe);
-  ((g4matrixDetectorConstruction*)detector)->SetRealSurfaceSpecularSpike(realspecularspike);
-  ((g4matrixDetectorConstruction*)detector)->SetRealSurfaceBackScattering(realbackscattering);
+  ((DetectorConstruction*)detector)->SetFastEnergy(fastenergy);
+  ((DetectorConstruction*)detector)->SetFastComponent(fastcomponent);
+  ((DetectorConstruction*)detector)->SetSlowEnergy(slowenergy);
+  ((DetectorConstruction*)detector)->SetSlowComponent(slowcomponent);
   
   
-  ((g4matrixDetectorConstruction*)detector)->SetEsrTransmittance(esrTransmittance);
-  ((g4matrixDetectorConstruction*)detector)->SetSourceDistance(distance);
-  ((g4matrixDetectorConstruction*)detector)->SetResolutionScale(resolutionScale);
+//   ((DetectorConstruction*)detector)->SetLateralDepolished(latdepolished);
+  ((DetectorConstruction*)detector)->SetLateralSurfaceRoughness(latsurfaceroughness);
+  ((DetectorConstruction*)detector)->SetLateralSurfaceSigmaAlpha(latsigmaalpha);
+  ((DetectorConstruction*)detector)->SetLateralSurfaceSpecularLobe(latspecularlobe);
+  ((DetectorConstruction*)detector)->SetLateralSurfaceSpecularSpike(latspecularspike);
+  ((DetectorConstruction*)detector)->SetLateralSurfaceBackScattering(latbackscattering);
+  
+  ((DetectorConstruction*)detector)->SetRealDepolished(realdepolished);
+  ((DetectorConstruction*)detector)->SetRealSurfaceRoughness(realsurfaceroughness);
+  ((DetectorConstruction*)detector)->SetRealSurfaceSigmaAlpha(realsigmaalpha);
+  ((DetectorConstruction*)detector)->SetRealSurfaceSpecularLobe(realspecularlobe);
+  ((DetectorConstruction*)detector)->SetRealSurfaceSpecularSpike(realspecularspike);
+  ((DetectorConstruction*)detector)->SetRealSurfaceBackScattering(realbackscattering);
+  
+  
+  ((DetectorConstruction*)detector)->SetEsrTransmittance(esrTransmittance);
+  ((DetectorConstruction*)detector)->SetSourceDistance(distance);
+  ((DetectorConstruction*)detector)->SetResolutionScale(resolutionScale);
   
   // Set mandatory initialization classes
   //
   // Detector construction
   runManager-> SetUserInitialization(detector);
   // Physics list
-  runManager-> SetUserInitialization(new g4matrixPhysicsList);
+  runManager-> SetUserInitialization(new PhysicsList);
   // User action initialization
-  runManager->SetUserInitialization(new g4matrixActionInitialization(config));
+  runManager->SetUserInitialization(new ActionInitialization(config));
   // Initialize G4 kernel
   //
   runManager->Initialize();
@@ -476,7 +476,7 @@ int main(int argc,char** argv)
 #ifdef G4VIS_USE
      UImanager->ApplyCommand("/control/execute vis.mac");
 #else
-     UImanager->ApplyCommand("/control/execute g4matrix.in");
+     UImanager->ApplyCommand("/control/execute .in");
 #endif
      if (ui->IsGUI())
         UImanager->ApplyCommand("/control/execute gui.mac");

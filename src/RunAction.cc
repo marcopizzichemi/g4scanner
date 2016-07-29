@@ -31,7 +31,7 @@
 // Make this appear first!
 #include "G4Timer.hh"
 
-#include "g4matrixRunAction.hh"
+#include "RunAction.hh"
 
 #include "G4Run.hh"
 #include "TROOT.h"
@@ -46,7 +46,7 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-g4matrixRunAction::g4matrixRunAction(/*float* aFloat*/)
+RunAction::RunAction(/*float* aFloat*/)
  : G4UserRunAction(),
    fTimer(0)
    //,pFloat(aFloat)
@@ -56,14 +56,14 @@ g4matrixRunAction::g4matrixRunAction(/*float* aFloat*/)
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-g4matrixRunAction::~g4matrixRunAction()
+RunAction::~RunAction()
 {
   delete fTimer;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void g4matrixRunAction::BeginOfRunAction(const G4Run* aRun)
+void RunAction::BeginOfRunAction(const G4Run* aRun)
 {
   
   gROOT->ProcessLine("#include <vector>"); //this is needed otherwise ROOT will complain about not knowing what a std::vector is...
@@ -76,7 +76,7 @@ void g4matrixRunAction::BeginOfRunAction(const G4Run* aRun)
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void g4matrixRunAction::EndOfRunAction(const G4Run* aRun)
+void RunAction::EndOfRunAction(const G4Run* aRun)
 {
   
   fTimer->Stop();

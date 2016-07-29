@@ -27,19 +27,19 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#ifndef g4matrixStackingAction_H
-#define g4matrixStackingAction_H 1
+#ifndef StackingAction_H
+#define StackingAction_H 1
 
 #include "globals.hh"
 #include "G4UserStackingAction.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-class g4matrixStackingAction : public G4UserStackingAction
+class StackingAction : public G4UserStackingAction
 {
   public:
-    g4matrixStackingAction();
-    virtual ~g4matrixStackingAction();
+    StackingAction();
+    virtual ~StackingAction();
 
   public:
     virtual G4ClassificationOfNewTrack ClassifyNewTrack(const G4Track* aTrack);

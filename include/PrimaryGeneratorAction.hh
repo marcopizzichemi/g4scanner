@@ -28,8 +28,8 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#ifndef g4matrixPrimaryGeneratorAction_h
-#define g4matrixPrimaryGeneratorAction_h 1
+#ifndef PrimaryGeneratorAction_h
+#define PrimaryGeneratorAction_h 1
 
 #include "G4VUserPrimaryGeneratorAction.hh"
 #include "globals.hh"
@@ -37,15 +37,15 @@
 
 class G4ParticleGun;
 class G4Event;
-class g4matrixPrimaryGeneratorMessenger;
+class PrimaryGeneratorMessenger;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-class g4matrixPrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
+class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 {
   public:
-    g4matrixPrimaryGeneratorAction(ConfigFile& config);
-    virtual ~g4matrixPrimaryGeneratorAction();
+    PrimaryGeneratorAction(ConfigFile& config);
+    virtual ~PrimaryGeneratorAction();
 
   public:
     virtual void GeneratePrimaries(G4Event*);
@@ -55,7 +55,7 @@ class g4matrixPrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 
   private:
     G4ParticleGun* fParticleGun;
-    g4matrixPrimaryGeneratorMessenger* fGunMessenger;
+    PrimaryGeneratorMessenger* fGunMessenger;
     G4double sourcex;  
     G4double sourcey; 
     G4double distance; 
@@ -75,4 +75,4 @@ class g4matrixPrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#endif /*g4matrixPrimaryGeneratorAction_h*/
+#endif /*PrimaryGeneratorAction_h*/

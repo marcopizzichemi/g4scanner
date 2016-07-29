@@ -28,8 +28,8 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#ifndef g4matrixRunAction_h
-#define g4matrixRunAction_h 1
+#ifndef RunAction_h
+#define RunAction_h 1
 
 #include "globals.hh"
 #include "G4UserRunAction.hh"
@@ -42,11 +42,11 @@
 class G4Timer;
 class G4Run;
 
-class g4matrixRunAction : public G4UserRunAction
+class RunAction : public G4UserRunAction
 {
   public:
-    g4matrixRunAction();
-    virtual ~g4matrixRunAction();
+    RunAction();
+    virtual ~RunAction();
 
   public:
     virtual void BeginOfRunAction(const G4Run* aRun);
@@ -61,4 +61,4 @@ class g4matrixRunAction : public G4UserRunAction
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#endif /*g4matrixRunAction_h*/
+#endif /*RunAction_h*/

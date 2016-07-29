@@ -28,8 +28,8 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#ifndef g4matrixDetectorConstruction_h
-#define g4matrixDetectorConstruction_h 1
+#ifndef DetectorConstruction_h
+#define DetectorConstruction_h 1
 
 #include "globals.hh"
 #include "G4VUserDetectorConstruction.hh"
@@ -38,11 +38,11 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-class g4matrixDetectorConstruction : public G4VUserDetectorConstruction
+class DetectorConstruction : public G4VUserDetectorConstruction
 {
   public:
-    g4matrixDetectorConstruction();
-    virtual ~g4matrixDetectorConstruction();
+    DetectorConstruction();
+    virtual ~DetectorConstruction();
 
   public:
     virtual G4VPhysicalVolume* Construct();
@@ -262,4 +262,4 @@ class g4matrixDetectorConstruction : public G4VUserDetectorConstruction
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#endif /*g4matrixDetectorConstruction_h*/
+#endif /*DetectorConstruction_h*/

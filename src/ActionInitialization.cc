@@ -23,62 +23,62 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-// $Id: g4matrixActionInitialization.cc 68058 2013-03-13 14:47:43Z gcosmo $
+// $Id: ActionInitialization.cc 68058 2013-03-13 14:47:43Z gcosmo $
 //
-/// \file g4matrixActionInitialization.cc
-/// \brief Implementation of the g4matrixActionInitialization class
+/// \file ActionInitialization.cc
+/// \brief Implementation of the ActionInitialization class
 
-#include "g4matrixActionInitialization.hh"
-#include "g4matrixPrimaryGeneratorAction.hh"
-#include "g4matrixDetectorConstruction.hh"
-#include "g4matrixRunAction.hh"
-#include "g4matrixEventAction.hh"
-#include "g4matrixSteppingAction.hh"
-#include "g4matrixStackingAction.hh"
-#include "g4matrixSteppingVerbose.hh"
+#include "ActionInitialization.hh"
+#include "PrimaryGeneratorAction.hh"
+#include "DetectorConstruction.hh"
+#include "RunAction.hh"
+#include "EventAction.hh"
+#include "SteppingAction.hh"
+#include "StackingAction.hh"
+#include "SteppingVerbose.hh"
 #include "ConfigFile.h"
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-g4matrixActionInitialization::g4matrixActionInitialization(ConfigFile& config)
+ActionInitialization::ActionInitialization(ConfigFile& config)
  : G4VUserActionInitialization(),
    fConfig(config)
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-g4matrixActionInitialization::~g4matrixActionInitialization()
+ActionInitialization::~ActionInitialization()
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void g4matrixActionInitialization::BuildForMaster() const
+void ActionInitialization::BuildForMaster() const
 {
-  SetUserAction(new g4matrixRunAction());
+  SetUserAction(new RunAction());
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void g4matrixActionInitialization::Build() const
+void ActionInitialization::Build() const
 {
   
   
-  SetUserAction(new g4matrixPrimaryGeneratorAction(fConfig));
-  g4matrixRunAction* runAction = new g4matrixRunAction();
+  SetUserAction(new PrimaryGeneratorAction(fConfig));
+  RunAction* runAction = new RunAction();
   SetUserAction(runAction);
-  g4matrixEventAction* eventAction = new g4matrixEventAction(runAction);
+  EventAction* eventAction = new EventAction(runAction);
   SetUserAction(eventAction);
-  SetUserAction(new g4matrixSteppingAction(fConfig));
-  SetUserAction(new g4matrixStackingAction());
+  SetUserAction(new SteppingAction(fConfig));
+  SetUserAction(new StackingAction());
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 G4VSteppingVerbose*
-               g4matrixActionInitialization::InitializeSteppingVerbose() const
+               ActionInitialization::InitializeSteppingVerbose() const
 {
-  return new g4matrixSteppingVerbose();
+  return new SteppingVerbose();
 }  
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

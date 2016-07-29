@@ -29,7 +29,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 
-#include "g4matrixDetectorConstruction.hh"
+#include "DetectorConstruction.hh"
 #include "G4SDManager.hh"
 
 #include "G4Material.hh"
@@ -53,7 +53,7 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-g4matrixDetectorConstruction::g4matrixDetectorConstruction()
+DetectorConstruction::DetectorConstruction()
  : G4VUserDetectorConstruction()
 {
   //Set default physical dimensions
@@ -194,11 +194,11 @@ g4matrixDetectorConstruction::g4matrixDetectorConstruction()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-g4matrixDetectorConstruction::~g4matrixDetectorConstruction(){;}
+DetectorConstruction::~DetectorConstruction(){;}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-G4VPhysicalVolume* g4matrixDetectorConstruction::Construct()
+G4VPhysicalVolume* DetectorConstruction::Construct()
 {
   
   //-------------------------------------------------------------------//
@@ -891,7 +891,7 @@ G4VPhysicalVolume* g4matrixDetectorConstruction::Construct()
   // The experimental Hall
   G4Box* expHall_box = new G4Box("World",fExpHall_x/2.0,fExpHall_y/2.0,fExpHall_z/2.0);
   G4LogicalVolume* expHall_log = new G4LogicalVolume(expHall_box,airThinLayer,"World",0,0,0);
-  expHall_log->SetVisAttributes (G4VisAttributes::GetInvisible());
+//   expHall_log->SetVisAttributes (G4VisAttributes::GetInvisible());
   G4VPhysicalVolume* expHall_phys = new G4PVPlacement(0,G4ThreeVector(),expHall_log,"World",0,false,fCheckOverlaps);
   
   

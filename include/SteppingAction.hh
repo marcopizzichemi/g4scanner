@@ -23,16 +23,16 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-// $Id: g4matrixSteppingAction.hh 69469 2013-05-05 21:42:35Z ihrivnac $
+// $Id: SteppingAction.hh 69469 2013-05-05 21:42:35Z ihrivnac $
 //
-/// \file g4matrixSteppingAction.hh
-/// \brief Definition of the g4matrixSteppingAction class
+/// \file SteppingAction.hh
+/// \brief Definition of the SteppingAction class
 
-#ifndef g4matrixSteppingAction_h
-#define g4matrixSteppingAction_h 1
+#ifndef SteppingAction_h
+#define SteppingAction_h 1
 
 #include "G4UserSteppingAction.hh"
-#include "g4matrixEventAction.hh"
+#include "EventAction.hh"
 #include "globals.hh"
 #include "ConfigFile.h"
 
@@ -40,12 +40,12 @@
 /// Stepping action class
 /// 
 
-class g4matrixSteppingAction : public G4UserSteppingAction
+class SteppingAction : public G4UserSteppingAction
 {
   public:
-    g4matrixSteppingAction(
+    SteppingAction(
                     ConfigFile& config);
-    virtual ~g4matrixSteppingAction();
+    virtual ~SteppingAction();
 
     // method from the base class
     virtual void UserSteppingAction(const G4Step*);
@@ -58,7 +58,7 @@ class g4matrixSteppingAction : public G4UserSteppingAction
     G4int fGammaStopped;
     G4int fElectronStopped;
 
-    g4matrixEventAction*  fEventAction;
+    EventAction*  fEventAction;
     
     G4double quantumEff;
     

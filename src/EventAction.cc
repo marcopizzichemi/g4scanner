@@ -23,13 +23,13 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-// $Id: g4matrixEventAction.cc 75604 2013-11-04 13:17:26Z gcosmo $
+// $Id: EventAction.cc 75604 2013-11-04 13:17:26Z gcosmo $
 // 
-/// \file g4matrixEventAction.cc
-/// \brief Implementation of the g4matrixEventAction class
+/// \file EventAction.cc
+/// \brief Implementation of the EventAction class
 
-#include "g4matrixEventAction.hh"
-#include "g4matrixRunAction.hh"
+#include "EventAction.hh"
+#include "RunAction.hh"
 // #include "B4Analysis.hh"
 
 #include "G4RunManager.hh"
@@ -44,19 +44,19 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-g4matrixEventAction::g4matrixEventAction(g4matrixRunAction* runAction)
+EventAction::EventAction(RunAction* runAction)
  : G4UserEventAction(),
       fRunAction(runAction)
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-g4matrixEventAction::~g4matrixEventAction()
+EventAction::~EventAction()
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void g4matrixEventAction::BeginOfEventAction(const G4Event* event)
+void EventAction::BeginOfEventAction(const G4Event* event)
 {  
 
   //print event number
@@ -77,7 +77,7 @@ void g4matrixEventAction::BeginOfEventAction(const G4Event* event)
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void g4matrixEventAction::EndOfEventAction(const G4Event* event)
+void EventAction::EndOfEventAction(const G4Event* event)
 {
   // Accumulate statistics
   // only if there was an energy deposition (otherwise, why would i save empty data?)

@@ -28,8 +28,8 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#include "g4matrixPrimaryGeneratorAction.hh"
-// #include "g4matrixPrimaryGeneratorMessenger.hh"
+#include "PrimaryGeneratorAction.hh"
+// #include "PrimaryGeneratorMessenger.hh"
 
 #include "Randomize.hh"
 
@@ -41,7 +41,7 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-g4matrixPrimaryGeneratorAction::g4matrixPrimaryGeneratorAction(ConfigFile& config)
+PrimaryGeneratorAction::PrimaryGeneratorAction(ConfigFile& config)
  : G4VUserPrimaryGeneratorAction(), 
    fParticleGun(0)
 //    ,fConfig(config)
@@ -50,7 +50,7 @@ g4matrixPrimaryGeneratorAction::g4matrixPrimaryGeneratorAction(ConfigFile& confi
   fParticleGun = new G4ParticleGun(n_particle);
 
   //create a messenger for this class
-  //fGunMessenger = new g4matrixPrimaryGeneratorMessenger(this);
+  //fGunMessenger = new PrimaryGeneratorMessenger(this);
 
   //default kinematic
   //
@@ -113,7 +113,7 @@ g4matrixPrimaryGeneratorAction::g4matrixPrimaryGeneratorAction(ConfigFile& confi
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-g4matrixPrimaryGeneratorAction::~g4matrixPrimaryGeneratorAction()
+PrimaryGeneratorAction::~PrimaryGeneratorAction()
 {
   delete fParticleGun;
 //   delete fGunMessenger;
@@ -121,7 +121,7 @@ g4matrixPrimaryGeneratorAction::~g4matrixPrimaryGeneratorAction()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void g4matrixPrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
+void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
   
   G4double halfDiagonal =  sqrt(pow((crystalx + esrThickness) * ncrystalx,2.0) + pow( (crystaly + esrThickness) * ncrystaly ,2.0)) / 2.0;
@@ -153,7 +153,7 @@ void g4matrixPrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-// void g4matrixPrimaryGeneratorAction::SetOptPhotonPolar()
+// void PrimaryGeneratorAction::SetOptPhotonPolar()
 // {
 //  G4double angle = G4UniformRand() * 360.0* deg;
 //  SetOptPhotonPolar(angle);
@@ -161,7 +161,7 @@ void g4matrixPrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 // 
 // //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 // 
-// void g4matrixPrimaryGeneratorAction::SetOptPhotonPolar(G4double angle)
+// void PrimaryGeneratorAction::SetOptPhotonPolar(G4double angle)
 // {
 //  if (fParticleGun->GetParticleDefinition()->GetParticleName()!="opticalphoton")
 //    {

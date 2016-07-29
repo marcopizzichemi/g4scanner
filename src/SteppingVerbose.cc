@@ -28,25 +28,25 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#include "g4matrixSteppingVerbose.hh"
+#include "SteppingVerbose.hh"
 
 #include "G4SteppingManager.hh"
 #include "G4UnitsTable.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-g4matrixSteppingVerbose::g4matrixSteppingVerbose()
+SteppingVerbose::SteppingVerbose()
  : G4SteppingVerbose()
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-g4matrixSteppingVerbose::~g4matrixSteppingVerbose()
+SteppingVerbose::~SteppingVerbose()
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void g4matrixSteppingVerbose::StepInfo()
+void SteppingVerbose::StepInfo()
 {
   CopyState();
 
@@ -140,7 +140,7 @@ void g4matrixSteppingVerbose::StepInfo()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void g4matrixSteppingVerbose::TrackingStarted()
+void SteppingVerbose::TrackingStarted()
 {
 
   CopyState();

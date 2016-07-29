@@ -23,12 +23,12 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-// $Id: g4matrixSteppingAction.cc 71007 2013-06-09 16:14:59Z maire $
+// $Id: SteppingAction.cc 71007 2013-06-09 16:14:59Z maire $
 //
-/// \file g4matrixSteppingAction.cc
-/// \brief Implementation of the g4matrixSteppingAction class
+/// \file SteppingAction.cc
+/// \brief Implementation of the SteppingAction class
 
-#include "g4matrixSteppingAction.hh"
+#include "SteppingAction.hh"
 
 #include "G4Step.hh"
 #include "G4Track.hh"
@@ -40,14 +40,14 @@
 
 #include "G4Event.hh"
 #include "G4RunManager.hh"
-#include "g4matrixEventAction.hh"
+#include "EventAction.hh"
 // #include "B4Analysis.hh"
 #include "CreateTree.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 
-g4matrixSteppingAction::g4matrixSteppingAction(
+SteppingAction::SteppingAction(
                       ConfigFile& config)
 : G4UserSteppingAction()
     //fEventAction(eventAction)
@@ -67,12 +67,12 @@ g4matrixSteppingAction::g4matrixSteppingAction(
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-g4matrixSteppingAction::~g4matrixSteppingAction()
+SteppingAction::~SteppingAction()
 { ; }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void g4matrixSteppingAction::UserSteppingAction(const G4Step* step)
+void SteppingAction::UserSteppingAction(const G4Step* step)
 {
   G4int eventNumber = G4RunManager::GetRunManager()->
                                               GetCurrentEvent()->GetEventID();
