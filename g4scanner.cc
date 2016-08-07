@@ -144,6 +144,47 @@ int main(int argc,char** argv)
   G4cout<< "Random seed : "<< myseed <<G4endl;
   G4cout << "Output file '" << filename << ".root '..."<< G4endl;
   
+  //read scanner geometry
+ 
+  std::string plate_x_s,plate_y_s,plate_z_s,rotation_s;
+  std::vector<std::string> plate_x_f,plate_y_f,plate_z_f,rotation_f;
+  std::vector<G4double>    plate_x,plate_y,plate_z,rotation; 
+   //y is assumed to b always 0 (planar geometry
+  G4int plates = config.read<int>("plates",2);
+  // so we just put 0 to all y
+  for(int i = 0 ; i < plates; i++)
+    plate_y.push_back(0);
+  G4int modules = config.read<int>("modules",1);
+  G4cout << "Plates in detector: " << plates << G4endl;
+  G4cout << "Modules per plate: " << modules << G4endl;
+  
+  plate_x_s    = config.read<std::string>("plateCenterX","0");
+//   plate_y_s    = config.read<std::string>("plateCenterY",0);
+  plate_z_s    = config.read<std::string>("plateCenterZ","0");
+  rotation_s   = config.read<std::string>("plateRotation","0");
+  config.split( plate_x_f, plate_x_s, "," );
+  config.split( plate_z_f, plate_z_s, "," );
+  config.split( rotation_f, rotation_s, "," );
+  for(int i = 0 ; i < plate_x_f.size() ; i++)
+  {
+    config.trim(plate_x_f[i]);
+    plate_x.push_back(atof(plate_x_f[i].c_str()));
+  }
+  for(int i = 0 ; i < plate_z_f.size() ; i++)
+  {
+    config.trim(plate_z_f[i]);
+    plate_z.push_back(atof(plate_z_f[i].c_str()));
+  }
+  for(int i = 0 ; i < rotation_f.size() ; i++)
+  {
+    config.trim(rotation_f[i]);
+    rotation.push_back(atof(rotation_f[i].c_str()));
+  }
+  assert( plates == plate_x.size() );
+  assert( plate_x.size() == plate_z.size() );
+  assert( plate_z.size() == rotation.size() );
+  
+  
   //read crystal dimensions
   G4double crystalx = config.read<double>("crystalx");
   G4double crystaly = config.read<double>("crystaly");
@@ -352,7 +393,7 @@ int main(int argc,char** argv)
   G4cout << "Quantum efficiency: " << quantumEff << G4endl; 
   
   //distance of source from back of the module
-  G4double distance = config.read<double>("distance");
+  G4double distance = config.read<double>("distance",0);
   
   
   // Choose the Random engine
@@ -375,7 +416,8 @@ int main(int argc,char** argv)
   //create output ttree
 //   CreateTree* mytree = new CreateTree("StandardTree",ncrystalx,ncrystaly,nmppcx,nmppcy,true,true);
   
-  CreateTree* mytree = new CreateTree("StandardTree",ncrystalx,ncrystaly,nmppcx,nmppcy);
+  
+  CreateTree* mytree = new CreateTree("StandardTree",ncrystalx*ncrystaly*modules*plates,nmppcx*nmppcy*modules*plates);
   //((CreateTree*)mytree)->SetModuleElements(ncrystalx,ncrystaly,nmppcx,nmppcy);
   //mytree->SetModuleElements(ncrystalx,ncrystaly,nmppcx,nmppcy);
   
@@ -386,6 +428,8 @@ int main(int argc,char** argv)
   DetectorConstruction* detector = new DetectorConstruction();
   
   //set the parameters of detector
+  ((DetectorConstruction*)detector)->SetDetectorGeometry(plates,modules);
+  ((DetectorConstruction*)detector)->SetPlateInSpace(plate_x,plate_y,plate_z,rotation);
   ((DetectorConstruction*)detector)->SetCrystalDimensions(crystalx,crystaly,crystalz);
   ((DetectorConstruction*)detector)->SetNumberOfCrystals(ncrystalx,ncrystaly);
   ((DetectorConstruction*)detector)->SetThinAirThickness(esrThickness);

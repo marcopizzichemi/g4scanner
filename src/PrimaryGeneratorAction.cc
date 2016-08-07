@@ -62,41 +62,78 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(ConfigFile& config)
   
   //source 
   //x position
-  sourcex = config.read<double>("sourcex");
+  sourcex = config.read<double>("sourcex",0);
   G4cout << "Gamma source x position [mm]: " << sourcex << G4endl;
   //y position of source
-  sourcey = config.read<double>("sourcey");
+  sourcey = config.read<double>("sourcey",0);
   G4cout << "Gamma source y position [mm]: " << sourcey << G4endl;
   //x position of source
-  distance = config.read<double>("distance");
-  G4cout << "Distance of source from back ESR [mm]: " << distance << G4endl;
+  sourcez = config.read<double>("sourcez",0);
+  G4cout << "Gamma source z position [mm]: " << sourcez << G4endl;
+//   distance = config.read<double>("distance");
+//   G4cout << "Distance of source from back ESR [mm]: " << distance << G4endl;
+  
+  //read position and orientation of plates in space
+  plates = config.read<int>("plates",2);
+  // so we just put 0 to all y
+  for(int i = 0 ; i < plates; i++)
+    plate_y.push_back(0);
+  modules = config.read<int>("modules",1);
+//   G4cout << "Plates in detector: " << plates << G4endl;
+//   G4cout << "Modules per plate: " << modules << G4endl;
+  
+  plate_x_s    = config.read<std::string>("plateCenterX","0");
+//   plate_y_s    = config.read<std::string>("plateCenterY",0);
+  plate_z_s    = config.read<std::string>("plateCenterZ","0");
+  rotation_s   = config.read<std::string>("plateRotation","0");
+  config.split( plate_x_f, plate_x_s, "," );
+  config.split( plate_z_f, plate_z_s, "," );
+  config.split( rotation_f, rotation_s, "," );
+  for(unsigned int i = 0 ; i < plate_x_f.size() ; i++)
+  {
+    config.trim(plate_x_f[i]);
+    plate_x.push_back(atof(plate_x_f[i].c_str()));
+  }
+  for(unsigned int i = 0 ; i < plate_z_f.size() ; i++)
+  {
+    config.trim(plate_z_f[i]);
+    plate_z.push_back(atof(plate_z_f[i].c_str()));
+  }
+  for(unsigned int i = 0 ; i < rotation_f.size() ; i++)
+  {
+    config.trim(rotation_f[i]);
+    rotation.push_back(atof(rotation_f[i].c_str()));
+  }
+  assert( plates == plate_x.size() );
+  assert( plate_x.size() == plate_z.size() );
+  assert( plate_z.size() == rotation.size() );
   
   //retrieve dimensions of the other elements and calculate the position of the source
-  G4double crystalz = config.read<double>("crystalz");
-  G4double greaseBack = config.read<double>("greaseBack");
-  G4double glassBack = config.read<double>("glassBack");
-  G4double airBack = config.read<double>("airBack");
+  crystalz = config.read<double>("crystalz");
+//   greaseBack = config.read<double>("greaseBack");
+//   glassBack = config.read<double>("glassBack");
+//   airBack = config.read<double>("airBack");
   //multiply for units [mm]
   crystalz   = crystalz*mm;
-  greaseBack = greaseBack*mm;
-  glassBack  = glassBack*mm;
-  airBack    = airBack*mm;
-  G4double fakeAir = 0.1*mm;  //fixed to 0.1, it has no physical meaning in our simulation
-  G4double sourcez = -(distance + (crystalz/2.0) + greaseBack + glassBack + airBack + fakeAir);
-  G4cout << "Gamma source z position [mm]: " << sourcez << G4endl;
+//   greaseBack = greaseBack*mm;
+//   glassBack  = glassBack*mm;
+//   airBack    = airBack*mm;
+//   G4double fakeAir = 0.1*mm;  //fixed to 0.1, it has no physical meaning in our simulation
+//   G4double sourcez = -(distance + (crystalz/2.0) + greaseBack + glassBack + airBack + fakeAir);
+//   G4cout << "Gamma source z position [mm]: " << sourcez << G4endl;
   //energy of gammas
   energy = config.read<double>("energy");
   G4cout << "Energy of gamma source [KeV]: " << energy << G4endl;
   //gamma direction
-  direction = config.read<int>("direction");
-  if(direction == 0)
-  {
-    G4cout << "Gammas shoot parallel to the z axis" << G4endl;
-  }
-  else
-  {
-    G4cout << "Gammas shoot randomly towards the matrix" << G4endl;
-  }
+//   direction = config.read<int>("direction");
+//   if(direction == 0)
+//   {
+//     G4cout << "Gammas shoot parallel to the z axis" << G4endl;
+//   }
+//   else
+//   {
+//     G4cout << "Gammas shoot randomly towards the matrix" << G4endl;
+//   }
   //find the x and y of matrix
   crystalx = config.read<double>("crystalx");
   crystaly = config.read<double>("crystaly");
@@ -125,29 +162,40 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
   
   G4double halfDiagonal =  sqrt(pow((crystalx + esrThickness) * ncrystalx,2.0) + pow( (crystaly + esrThickness) * ncrystaly ,2.0)) / 2.0;
+  //we assume for this test that the 2 modules have the same distance from the center of setup
+  double distance = sqrt(plate_x[0]*plate_x[0] + plate_z[0]*plate_z[0]) - crystalz/2.0;
+  
+//   G4cout << distance << G4endl;
+  
   G4double angleLimit = atan(halfDiagonal / distance);
-  //theta = (G4UniformRand() * 2.0*angleLimit) - angleLimit; //WRONG!!!! this would make cos(theta) uniform, not sin(theta)d(theta)
   
   //find the limit for acos
   double acosMin = cos(angleLimit);
   //so acos will have to be generated uniformely between acosMin and +1
   
   double randomNum =  G4UniformRand()*(1.0 - acosMin)  + (acosMin);
+//   double randomNum =  G4UniformRand()*2.0  -1.0; //random num between -1 and 1
   theta = acos(randomNum); 
   
   phi = G4UniformRand() * 2.0 * CLHEP::pi;
   
-  //G4cout << "Theta = " << theta << G4endl;
-  //G4cout << "Phi = " << phi << G4endl;
+//   theta = 0.0;
+//   phi = 0.1;
   
-  if(direction == 0)
-  {
-    fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
-  }
-  else
-  {
+//   G4cout << "Theta = " << theta << G4endl;
+//   G4cout << "Phi = " << phi << G4endl;
+  
+//   if(direction == 0)
+//   {
+//     fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
+//   }
+//   else
+//   {
     fParticleGun->SetParticleMomentumDirection(G4ThreeVector(sin(theta)*sin(phi),sin(theta)*cos(phi),cos(theta) ));
-  }
+//   }
+  fParticleGun->GeneratePrimaryVertex(anEvent);
+  theta = theta + CLHEP::pi; 
+  fParticleGun->SetParticleMomentumDirection(G4ThreeVector(sin(theta)*sin(phi),sin(theta)*cos(phi),cos(theta) ));
   fParticleGun->GeneratePrimaryVertex(anEvent);
 }
 

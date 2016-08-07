@@ -47,6 +47,9 @@ class DetectorConstruction : public G4VUserDetectorConstruction
   public:
     virtual G4VPhysicalVolume* Construct();
     
+    void SetPlateInSpace(std::vector<G4double> px,std::vector<G4double> py,std::vector<G4double> pz,std::vector<G4double> r){pBubble_x = px;pBubble_y = py;pBubble_z = pz;rotation = r;};
+    
+    void SetDetectorGeometry(G4double x, G4double y){plates = x;modules=y;};
     void SetCrystalDimensions(G4double x, G4double y, G4double z) { fCrystal_x = x *mm ; fCrystal_y = y*mm ; fCrystal_z =z*mm; };
     void SetNumberOfCrystals(G4int nx, G4int ny) {nCrystalsX = nx; nCrystalsY = ny;};
     void SetThinAirThickness(G4double x) { airThinThickness = x*mm; };
@@ -109,6 +112,13 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     
   private:
 
+    G4int    plates;                                    //number of plates in the scanner, by default 2
+    G4int    modules;                                   // number of modules per plate, by default 1
+    
+    G4double bubble_dim_x;
+    G4double bubble_dim_y;
+    G4double bubble_dim_z;
+    
     G4double fCrystal_x;				//x dimensions of crystals
     G4double fCrystal_y;				//y dimensions of crystals
     G4double fCrystal_z;				//z dimensions of crystals    
@@ -121,6 +131,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4double fAirThinLayerBox_x;			//x dim of air box around crystals. In reality is the dimensions of the vikuiti box (but vikuiti is "confined" to a surface)
     G4double fAirThinLayerBox_y;			//y dim of air box around crystals. In reality is the dimensions of the vikuiti box (but vikuiti is "confined" to a surface)
     G4double fAirThinLayerBox_z;			//x dim of air box around crystals. In reality is the dimensions of the vikuiti box (but vikuiti is "confined" to a surface)
+    
+    
     
     G4double fExpHall_x;				//x dimensions of world
     G4double fExpHall_y;				//y dimensions of world
@@ -176,6 +188,12 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     
     
     //POSITIONS
+    
+    
+    std::vector<G4double> rotation;
+    std::vector<G4double> pBubble_x;
+    std::vector<G4double> pBubble_y;
+    std::vector<G4double> pBubble_z;
     
     G4double matrixShiftX;				//shift required to put the matrix in the center of the world
     G4double matrixShiftY;

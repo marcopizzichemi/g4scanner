@@ -6,25 +6,23 @@ CreateTree* CreateTree::fInstance = NULL;
 
 using namespace std;
 
-CreateTree::CreateTree(TString name, int x, int y, int z, int k)
-  : nCrystalsX(x),
-    nCrystalsY(y),
-    nDetectorsX(z), 
-    nDetectorsY(k)
+CreateTree::CreateTree(TString name, int x, int y)
+  : nCrystals(x),
+    nDetectors(y)
 {
   
   //G4cout << "DETECTORS "  << " " << nDetectorsX << " " << nDetectorsY << G4endl; ;
   
   //create the vectors
-  DetectorHit         = new Short_t [nDetectorsX*nDetectorsY];
-  CryEnergyDeposited  = new std::vector<float> [nCrystalsX*nCrystalsY];
-  pCryEnergyDeposited = new std::vector<float>* [nCrystalsX*nCrystalsY];
-  PosXEnDep           = new std::vector<float> [nCrystalsX*nCrystalsY];
-  pPosXEnDep          = new std::vector<float>* [nCrystalsX*nCrystalsY];
-  PosYEnDep           = new std::vector<float> [nCrystalsX*nCrystalsY];
-  pPosYEnDep          = new std::vector<float>* [nCrystalsX*nCrystalsY];
-  PosZEnDep           = new std::vector<float> [nCrystalsX*nCrystalsY];
-  pPosZEnDep          = new std::vector<float>* [nCrystalsX*nCrystalsY];
+  DetectorHit         = new Short_t [nDetectors];
+  CryEnergyDeposited  = new std::vector<float> [nCrystals];
+  pCryEnergyDeposited = new std::vector<float>* [nCrystals];
+  PosXEnDep           = new std::vector<float> [nCrystals];
+  pPosXEnDep          = new std::vector<float>* [nCrystals];
+  PosYEnDep           = new std::vector<float> [nCrystals];
+  pPosYEnDep          = new std::vector<float>* [nCrystals];
+  PosZEnDep           = new std::vector<float> [nCrystals];
+  pPosZEnDep          = new std::vector<float>* [nCrystals];
   
   gROOT->ProcessLine("#include <vector>"); //this is needed otherwise ROOT will complain about not knowing what a std::vector is...
   if(fInstance) 
@@ -47,7 +45,7 @@ CreateTree::CreateTree(TString name, int x, int y, int z, int k)
   this->GetTree()->Branch("NumOptPhotons",&this->NumOptPhotons,"NumOptPhotons/I");
   this->GetTree()->Branch("NumCherenkovPhotons",&this->NumCherenkovPhotons,"NumCherenkovPhotons/I");
   
-  for(int i = 0; i < nCrystalsX*nCrystalsY ; i++) 
+  for(int i = 0; i < nCrystals ; i++) 
   {
     pCryEnergyDeposited[i] = &CryEnergyDeposited[i];
     pPosXEnDep[i] = &PosXEnDep[i];
@@ -55,7 +53,7 @@ CreateTree::CreateTree(TString name, int x, int y, int z, int k)
     pPosZEnDep[i] = &PosZEnDep[i];
   }
   
-  for (int i = 0 ; i < nCrystalsX*nCrystalsY ; i++) 
+  for (int i = 0 ; i < nCrystals ; i++) 
   {
     std::stringstream snames;
     snames << "cry" << i;
@@ -71,7 +69,7 @@ CreateTree::CreateTree(TString name, int x, int y, int z, int k)
     this->GetTree()->Branch(snames.str().c_str(),"std::vector<float>",&pPosZEnDep[i]);
   }
   
-  for (int i = 0 ; i < nDetectorsX*nDetectorsY ; i++) 
+  for (int i = 0 ; i < nDetectors ; i++) 
   {
     std::stringstream snames,stypes;
     snames << "detector" << i;
@@ -155,7 +153,7 @@ void CreateTree::Clear()
   NumCherenkovPhotons=0;
   totalEnergyDeposited=0;
   
-  for(int i = 0; i < nCrystalsX*nCrystalsY ; i++)
+  for(int i = 0; i < nCrystals ; i++)
   {
     CryEnergyDeposited[i].clear();
     PosXEnDep[i].clear();
@@ -163,7 +161,7 @@ void CreateTree::Clear()
     PosZEnDep[i].clear();
   }
   
-  for (int i = 0 ; i < nDetectorsX*nDetectorsY ; i++)//
+  for (int i = 0 ; i < nDetectors ; i++)//
   {
     DetectorHit[i] = 0;
   }

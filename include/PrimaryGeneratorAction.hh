@@ -34,6 +34,7 @@
 #include "G4VUserPrimaryGeneratorAction.hh"
 #include "globals.hh"
 #include "ConfigFile.h"
+#include <vector>
 
 class G4ParticleGun;
 class G4Event;
@@ -58,6 +59,7 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
     PrimaryGeneratorMessenger* fGunMessenger;
     G4double sourcex;  
     G4double sourcey; 
+    G4double sourcez; 
     G4double distance; 
     G4double energy;   
     G4double direction;
@@ -69,6 +71,14 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
     G4double crystaly;
     G4int ncrystalx;
     G4int ncrystaly;
+    G4int modules,plates;
+    G4double crystalz;
+    G4double greaseBack;
+    G4double glassBack; 
+    G4double airBack;
+    std::string plate_x_s,plate_y_s,plate_z_s,rotation_s;
+    std::vector<std::string> plate_x_f,plate_y_f,plate_z_f,rotation_f;
+    std::vector<G4double>    plate_x,plate_y,plate_z,rotation; 
     
     
 };
