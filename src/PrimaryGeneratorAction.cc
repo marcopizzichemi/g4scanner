@@ -29,25 +29,25 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #include "PrimaryGeneratorAction.hh"
-// #include "PrimaryGeneratorMessenger.hh"
 
 #include "Randomize.hh"
 
 #include "G4Event.hh"
-#include "G4ParticleGun.hh"
+#include "G4GeneralParticleSource.hh"
 #include "G4ParticleTable.hh"
 #include "G4ParticleDefinition.hh"
 #include "G4SystemOfUnits.hh"
+#include "G4ParticleGun.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 PrimaryGeneratorAction::PrimaryGeneratorAction(ConfigFile& config)
- : G4VUserPrimaryGeneratorAction(), 
+ : G4VUserPrimaryGeneratorAction(),
    fParticleGun(0)
 //    ,fConfig(config)
 {
-  G4int n_particle = 1;
-  fParticleGun = new G4ParticleGun(n_particle);
+  //G4int n_particle = 1;
+  fParticleGun = new G4GeneralParticleSource();
 
   //create a messenger for this class
   //fGunMessenger = new PrimaryGeneratorMessenger(this);
@@ -57,10 +57,10 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(ConfigFile& config)
   G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
   G4ParticleDefinition* particle = particleTable->FindParticle("gamma");
 
-  fParticleGun->SetParticleDefinition(particle);
+  fParticleGun->GetCurrentSource()->SetParticleDefinition(particle);
   fParticleGun->SetParticleTime(0.0*ns);
-  
-  //source 
+
+  //source
   //x position
   sourcex = config.read<double>("sourcex",0);
   G4cout << "Gamma source x position [mm]: " << sourcex << G4endl;
@@ -72,7 +72,7 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(ConfigFile& config)
   G4cout << "Gamma source z position [mm]: " << sourcez << G4endl;
 //   distance = config.read<double>("distance");
 //   G4cout << "Distance of source from back ESR [mm]: " << distance << G4endl;
-  
+
   //read position and orientation of plates in space
   plates = config.read<int>("plates",2);
   // so we just put 0 to all y
@@ -81,7 +81,7 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(ConfigFile& config)
   modules = config.read<int>("modules",1);
 //   G4cout << "Plates in detector: " << plates << G4endl;
 //   G4cout << "Modules per plate: " << modules << G4endl;
-  
+
   plate_x_s    = config.read<std::string>("plateCenterX","0");
 //   plate_y_s    = config.read<std::string>("plateCenterY",0);
   plate_z_s    = config.read<std::string>("plateCenterZ","0");
@@ -107,7 +107,7 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(ConfigFile& config)
   assert( plates == plate_x.size() );
   assert( plate_x.size() == plate_z.size() );
   assert( plate_z.size() == rotation.size() );
-  
+
   //retrieve dimensions of the other elements and calculate the position of the source
   crystalz = config.read<double>("crystalz");
 //   greaseBack = config.read<double>("greaseBack");
@@ -123,7 +123,7 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(ConfigFile& config)
 //   G4cout << "Gamma source z position [mm]: " << sourcez << G4endl;
   //energy of gammas
   energy = config.read<double>("energy");
-  G4cout << "Energy of gamma source [KeV]: " << energy << G4endl;
+  G4cout << "Energy of gamma source [keV]: " << energy << G4endl;
   //gamma direction
 //   direction = config.read<int>("direction");
 //   if(direction == 0)
@@ -141,11 +141,25 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(ConfigFile& config)
   ncrystaly = config.read<int>("ncrystaly");
   esrThickness = config.read<double>("esrThickness");
 
-  //FIXME this assumes pointlike source. wouldn't it be better to have a 1mm diameter sphere?
-  fParticleGun->SetParticlePosition(G4ThreeVector(sourcex,sourcey,sourcez));
-  fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
-  fParticleGun->SetParticleEnergy(energy*keV);
-  
+  //SOURCE = 1mm diameter sphere
+
+  // set energy distribution
+  G4SPSEneDistribution *eneDist = fParticleGun->GetCurrentSource()->GetEneDist() ;
+  eneDist->SetEnergyDisType("Mono"); // or gauss
+  eneDist->SetMonoEnergy(energy*keV);
+
+  // set position distribution
+  G4SPSPosDistribution *posDist = fParticleGun->GetCurrentSource()->GetPosDist();
+  posDist->SetPosDisType("Volume");  // or Point,Plane,Volume,Beam
+  posDist->SetPosDisShape("Sphere");
+  posDist->SetRadius(0.5*mm);
+  posDist->SetCentreCoords(G4ThreeVector(sourcex*mm,sourcey*mm,sourcez*mm));
+
+  // set angular distribution
+  G4SPSAngDistribution *angDist = fParticleGun->GetCurrentSource()->GetAngDist();
+  angDist->SetParticleMomentumDirection( G4ThreeVector(0., 0., 1.) );
+
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -153,82 +167,33 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(ConfigFile& config)
 PrimaryGeneratorAction::~PrimaryGeneratorAction()
 {
   delete fParticleGun;
-//   delete fGunMessenger;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
-  
+
   G4double halfDiagonal =  sqrt(pow((crystalx + esrThickness) * ncrystalx,2.0) + pow( (crystaly + esrThickness) * ncrystaly ,2.0)) / 2.0;
   //we assume for this test that the 2 modules have the same distance from the center of setup
   double distance = sqrt(plate_x[0]*plate_x[0] + plate_z[0]*plate_z[0]) - crystalz/2.0;
-  
-//   G4cout << distance << G4endl;
-  
   G4double angleLimit = atan(halfDiagonal / distance);
-  
   //find the limit for acos
   double acosMin = cos(angleLimit);
   //so acos will have to be generated uniformely between acosMin and +1
-  
   double randomNum =  G4UniformRand()*(1.0 - acosMin)  + (acosMin);
-//   double randomNum =  G4UniformRand()*2.0  -1.0; //random num between -1 and 1
-  theta = acos(randomNum); 
-  
+  //double randomNum =  G4UniformRand()*2.0  -1.0; //random num between -1 and 1
+  theta = acos(randomNum);
   phi = G4UniformRand() * 2.0 * CLHEP::pi;
-  
-//   theta = 0.0;
-//   phi = 0.1;
-  
-//   G4cout << "Theta = " << theta << G4endl;
-//   G4cout << "Phi = " << phi << G4endl;
-  
-//   if(direction == 0)
-//   {
-//     fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
-//   }
-//   else
-//   {
-    fParticleGun->SetParticleMomentumDirection(G4ThreeVector(sin(theta)*sin(phi),sin(theta)*cos(phi),cos(theta) ));
-//   }
+
+  G4SPSAngDistribution *angDist = fParticleGun->GetCurrentSource()->GetAngDist();
+  angDist->SetParticleMomentumDirection(G4ThreeVector(sin(theta)*sin(phi),sin(theta)*cos(phi),cos(theta)));
   fParticleGun->GeneratePrimaryVertex(anEvent);
-  theta = theta + CLHEP::pi; 
-  fParticleGun->SetParticleMomentumDirection(G4ThreeVector(sin(theta)*sin(phi),sin(theta)*cos(phi),cos(theta) ));
+
+  theta = theta + CLHEP::pi;
+  angDist->SetParticleMomentumDirection(G4ThreeVector(sin(theta)*sin(phi),sin(theta)*cos(phi),cos(theta)));
   fParticleGun->GeneratePrimaryVertex(anEvent);
+
 }
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-// void PrimaryGeneratorAction::SetOptPhotonPolar()
-// {
-//  G4double angle = G4UniformRand() * 360.0* deg;
-//  SetOptPhotonPolar(angle);
-// }
-// 
-// //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-// 
-// void PrimaryGeneratorAction::SetOptPhotonPolar(G4double angle)
-// {
-//  if (fParticleGun->GetParticleDefinition()->GetParticleName()!="opticalphoton")
-//    {
-//      G4cout << "--> warning from PrimaryGeneratorAction::SetOptPhotonPolar() :"
-//                "the particleGun is not an opticalphoton" << G4endl;
-//      return;
-//    }
-// 
-//  G4ThreeVector normal (1., 0., 0.);
-//  G4ThreeVector kphoton = fParticleGun->GetParticleMomentumDirection();
-//  G4ThreeVector product = normal.cross(kphoton);
-//  G4double modul2       = product*product;
-//  
-//  G4ThreeVector e_perpend (0., 0., 1.);
-//  if (modul2 > 0.) e_perpend = (1./std::sqrt(modul2))*product;
-//  G4ThreeVector e_paralle    = e_perpend.cross(kphoton);
-//  
-//  G4ThreeVector polar = std::cos(angle)*e_paralle + std::sin(angle)*e_perpend;
-//  fParticleGun->SetParticlePolarization(polar);
-// }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
