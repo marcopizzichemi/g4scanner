@@ -51,17 +51,17 @@ SteppingAction::SteppingAction(
                       ConfigFile& config)
 : G4UserSteppingAction()
     //fEventAction(eventAction)
-{ 
+{
   fScintillationCounter = 0;
   fCerenkovCounter      = 0;
   fEventNumber = -1;
   fOpticalPhotonsStopped = 0;
   fGammaStopped = 0;
   fElectronStopped = 0;
-  
+
   quantumEff = config.read<double>("quantumEff");
-  
-  
+
+
   //ch[] = {0};
 }
 
@@ -80,38 +80,38 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   if (eventNumber != fEventNumber) {
      G4cout << "Number of Scintillation Photons in previous event: "
             << fScintillationCounter << G4endl;
-     G4cout << "Number of Cerenkov Photons in previous event: "
-            << fCerenkovCounter << G4endl;
+     /*G4cout << "Number of Cerenkov Photons in previous event: "
+            << fCerenkovCounter << G4endl;*/
      fEventNumber = eventNumber;
      fScintillationCounter = 0;
      fCerenkovCounter = 0;
   }
-  
-  
-	
+
+
+
   G4Track* track = step->GetTrack();
-  G4String ParticleName = track->GetDynamicParticle()->GetParticleDefinition()->GetParticleName();  
+  G4String ParticleName = track->GetDynamicParticle()->GetParticleDefinition()->GetParticleName();
   G4String materialName = step->GetPreStepPoint()->GetPhysicalVolume()->GetLogicalVolume()->GetMaterial()->GetName();
-  
+
   G4VPhysicalVolume* thePrePV  = step->GetPreStepPoint() ->GetPhysicalVolume();
   G4VPhysicalVolume* thePostPV = step->GetPostStepPoint()->GetPhysicalVolume();
-                     
+
   G4String PreMaterialName ;
   G4String PostMaterialName ;
-  
+
   if(thePrePV) PreMaterialName = thePrePV->GetLogicalVolume()->GetMaterial()->GetName();
   if(thePostPV) PostMaterialName = thePostPV->GetLogicalVolume()->GetMaterial()->GetName();
-			       
-			       
+
+
   //getting information from the particles
-  
-  //for opticalphoton, we want to know where they stopped 
+
+  //for opticalphoton, we want to know where they stopped
   if (ParticleName == "opticalphoton") //if it's an opticalphoton
   {
     //BEGIN of debug part (flood maps not symmetric issue)
 //     G4OpBoundaryProcessStatus boundaryStatus=Undefined;
 //     static G4ThreadLocal G4OpBoundaryProcess* boundary=NULL;
-//     
+//
 //     //find the boundary process only once
 //     if(!boundary)
 //     {
@@ -129,21 +129,21 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
 //       }
 //     }
 //     boundaryStatus = boundary->GetStatus();
-//     
+//
 //     if((materialName == "AirThinLayer") && (boundaryStatus == Transmission))
 //     {
 //       G4ThreeVector TransmissionPosition = track->GetStep()->GetPostStepPoint()->GetPosition(); //get the position vector
 //       CreateTree::Instance()->TransmissionX.push_back(TransmissionPosition.getX());
 //       CreateTree::Instance()->TransmissionY.push_back(TransmissionPosition.getY());
-//       CreateTree::Instance()->TransmissionZ.push_back(TransmissionPosition.getZ());   
+//       CreateTree::Instance()->TransmissionZ.push_back(TransmissionPosition.getZ());
 //     }
-//     
-    //END of debug part (flood maps not symmetric issue) 
-    
-    //BEGIN of test part        
+//
+    //END of debug part (flood maps not symmetric issue)
+
+    //BEGIN of test part
     G4OpBoundaryProcessStatus boundaryStatus=Undefined;
     static G4ThreadLocal G4OpBoundaryProcess* boundary=NULL;
-    
+
     //find the boundary process only once
     if(!boundary)
     {
@@ -161,38 +161,38 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
       }
     }
     boundaryStatus = boundary->GetStatus();
-    
+
     if(/*(PreMaterialName == "Epoxy") && */(PostMaterialName == "SilicioMPPC") && (boundaryStatus == FresnelRefraction)) //whatever enters a detector volume
     {
       //G4cout << PreMaterialName << " " << PostMaterialName << G4endl;
       G4String detectorName = step->GetPostStepPoint()->GetPhysicalVolume()->GetName();
       int numb;
       std::istringstream ( detectorName ) >> numb;
-      
+
       //take into account quantum efficiency
       G4double rand = G4UniformRand();
       //record the photon, if QE allows it
       if(rand < quantumEff) //absorb the optical photon, save the relevant data
       {
 	CreateTree::Instance()->DetectorHit[numb]++;
-	
+
 	G4ThreeVector OnDetectorPosition = track->GetStep()->GetPostStepPoint()->GetPosition(); //get the position vector
 	G4ThreeVector PreOnDetectorMomentum = track->GetStep()->GetPreStepPoint()->GetMomentumDirection(); //get the momentum, unit vector
 	G4ThreeVector PostOnDetectorMomentum = track->GetStep()->GetPostStepPoint()->GetMomentumDirection(); //get the momentum, unit vector
 	G4double globalTime = track->GetGlobalTime();
-	
+
 	CreateTree::Instance()->PositionX.push_back(OnDetectorPosition.getX());
 	CreateTree::Instance()->PositionY.push_back(OnDetectorPosition.getY());
 	CreateTree::Instance()->PositionZ.push_back(OnDetectorPosition.getZ());
-	
+
 	CreateTree::Instance()->PreMomentumX.push_back(PreOnDetectorMomentum.getX()/*/CLHEP::nm*/);
 	CreateTree::Instance()->PreMomentumY.push_back(PreOnDetectorMomentum.getY()/*/CLHEP::nm*/);
 	CreateTree::Instance()->PreMomentumZ.push_back(PreOnDetectorMomentum.getZ()/*/CLHEP::nm*/);
-	
+
 	CreateTree::Instance()->PostMomentumX.push_back(PostOnDetectorMomentum.getX()/*/CLHEP::nm*/);
 	CreateTree::Instance()->PostMomentumY.push_back(PostOnDetectorMomentum.getY()/*/CLHEP::nm*/);
 	CreateTree::Instance()->PostMomentumZ.push_back(PostOnDetectorMomentum.getZ()/*/CLHEP::nm*/);
-	
+
 	//BEGIN of DEBUG for negative PostMomentumZ
 // 	if(PostOnDetectorMomentum.getZ() < 0)
 // 	{
@@ -203,8 +203,8 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
 // 	  G4cout << "----------------------------------------------------------------------------------------------------------------" << G4endl;
 // 	}
 	//END of DEBUG for negative PostMomentumZ
-	
-	
+
+
 	//save the process that created the photon
 	if(track->GetCreatorProcess()->GetProcessName() == "Scintillation")
 	  CreateTree::Instance()->PhotonType.push_back(0);
@@ -212,18 +212,18 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
 	  CreateTree::Instance()->PhotonType.push_back(1);
 	else
 	  CreateTree::Instance()->PhotonType.push_back(2);
-	
-	CreateTree::Instance()->GlobalTime.push_back(globalTime/CLHEP::ns);  
+
+	CreateTree::Instance()->GlobalTime.push_back(globalTime/CLHEP::ns);
 	CreateTree::Instance()->PhotonEnergy.push_back(track->GetDynamicParticle()->GetTotalEnergy()/CLHEP::eV);
-  
-	
+
+
       }
       //kill the photon
-      track->SetTrackStatus(fStopAndKill); 
+      track->SetTrackStatus(fStopAndKill);
     }
     //END of test part
-    
-    
+
+
     //BEGIN of standard method
 //     if(track->GetTrackStatus()==fStopAndKill) //if it just died here
 //     {
@@ -233,29 +233,29 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
 // 	G4String detectorName = step->GetPostStepPoint()->GetPhysicalVolume()->GetName();
 // 	int numb;
 // 	std::istringstream ( detectorName ) >> numb;
-// 	
+//
 // 	//take into account quantum efficiency
 // 	G4double rand = G4UniformRand();
-// 	
+//
 // 	if(rand < quantumEff) //absorb the optical photon, save the relevant data
 // 	{
 // 	  CreateTree::Instance()->DetectorHit[numb]++;
-// 	  
+//
 // 	  G4ThreeVector OnDetectorPosition = track->GetStep()->GetPostStepPoint()->GetPosition(); //get the position vector
 // 	  G4ThreeVector OnDetectorMomentum = track->GetStep()->GetPostStepPoint()->GetMomentumDirection(); //get the momentum, unit vector
 // 	  G4double globalTime = track->GetGlobalTime();
-// 	  
+//
 // 	  CreateTree::Instance()->PositionX.push_back(OnDetectorPosition.getX());
 //           CreateTree::Instance()->PositionY.push_back(OnDetectorPosition.getY());
 // 	  CreateTree::Instance()->PositionZ.push_back(OnDetectorPosition.getZ());
-// 	  
+//
 // 	  CreateTree::Instance()->MomentumX.push_back(OnDetectorMomentum.getX()/*/CLHEP::nm*/);
 //           CreateTree::Instance()->MomentumY.push_back(OnDetectorMomentum.getY()/*/CLHEP::nm*/);
 // 	  CreateTree::Instance()->MomentumZ.push_back(OnDetectorMomentum.getZ()/*/CLHEP::nm*/);
-// 	  
+//
 // 	  CreateTree::Instance()->GlobalTime.push_back(globalTime/CLHEP::ns);
 // 	}
-//       } 
+//       }
 //     }
     //END of standard method
   }
@@ -267,11 +267,11 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
     {
       if(materialName == "LYSO") //if the electron is interacting with the detector, it does a huge number of cherenkov
       {
-	
+
 	//get the deposition process name
 // 	G4OpBoundaryProcessStatus boundaryStatus=Undefined;
 // 	static G4ThreadLocal G4OpBoundaryProcess* boundary=NULL;
-	
+
 	//find the boundary process only once
 // 	if(!boundary)
 // 	{
@@ -279,7 +279,7 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
 // 	  G4int nprocesses = pm->GetProcessListLength();
 // 	  G4ProcessVector* pv = pm->GetProcessList();
 // 	  G4int i;
-	  
+
 // 	  for( i=0;i<nprocesses;i++)
 // 	  {
 // 	    if((*pv)[i]->GetProcessName()=="OpBoundary")
@@ -291,8 +291,8 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
 // 	  }
 // 	}
 // 	boundaryStatus = boundary->GetStatus();
-	
-	
+
+
 	//add total energy deposited
 	CreateTree::Instance()->totalEnergyDeposited += edep;
 	//take crystal name
@@ -311,33 +311,36 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
       }
     }
   }
-  
+
   if (ParticleName == "opticalphoton") return;
   const std::vector<const G4Track*>* secondaries =
                                             step->GetSecondaryInCurrentStep();
-  if (secondaries->size()>0) {
-     for(unsigned int i=0; i<secondaries->size(); ++i) {
-        if (secondaries->at(i)->GetParentID()>0) {
-           if(secondaries->at(i)->GetDynamicParticle()->GetParticleDefinition()
-               == G4OpticalPhoton::OpticalPhotonDefinition()){
-              if (secondaries->at(i)->GetCreatorProcess()->GetProcessName()
-               == "Scintillation")
-	      {
-		CreateTree::Instance()->NumOptPhotons++;
-		fScintillationCounter++;
-	      }
-              if (secondaries->at(i)->GetCreatorProcess()->GetProcessName()
-               == "Cerenkov")
-	      {
-		fCerenkovCounter++;
-		CreateTree::Instance()->NumCherenkovPhotons++;
-	      }
-           }
+  if (secondaries->size()>0)
+  {
+     for(unsigned int i=0; i<secondaries->size(); ++i)
+     {
+        if (secondaries->at(i)->GetParentID()>0)
+        {
+          if(secondaries->at(i)->GetDynamicParticle()->GetParticleDefinition()
+          == G4OpticalPhoton::OpticalPhotonDefinition())
+          {
+            if (secondaries->at(i)->GetCreatorProcess()->GetProcessName()
+            == "Scintillation")
+            {
+            	CreateTree::Instance()->NumOptPhotons++;
+            	fScintillationCounter++;
+            }
+            if (secondaries->at(i)->GetCreatorProcess()->GetProcessName()
+             == "Cerenkov")
+            {
+              CreateTree::Instance()->NumCherenkovPhotons++;
+            }
+          }
         }
      }
   }
-  
-  
+
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

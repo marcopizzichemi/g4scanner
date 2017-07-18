@@ -53,6 +53,7 @@ StackingAction::~StackingAction()
 G4ClassificationOfNewTrack
 StackingAction::ClassifyNewTrack(const G4Track * aTrack)
 {
+  G4ClassificationOfNewTrack result(fUrgent);
   if(aTrack->GetDefinition() == G4OpticalPhoton::OpticalPhotonDefinition())
   { // particle is optical photon
     if(aTrack->GetParentID()>0)
@@ -60,10 +61,12 @@ StackingAction::ClassifyNewTrack(const G4Track * aTrack)
       if(aTrack->GetCreatorProcess()->GetProcessName() == "Scintillation")
         fScintillationCounter++;
       if(aTrack->GetCreatorProcess()->GetProcessName() == "Cerenkov")
-        fCerenkovCounter++;
+      {
+        result = fKill; //Kill Cerenkov
+      }
     }
   }
-  return fUrgent;
+  return result;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -72,8 +75,8 @@ void StackingAction::NewStage()
 {
   G4cout << "Number of Scintillation photons produced in this event : "
          << fScintillationCounter << G4endl;
-  G4cout << "Number of Cerenkov photons produced in this event : "
-         << fCerenkovCounter << G4endl;
+  /*G4cout << "Number of Cerenkov photons produced in this event : "
+         << fCerenkovCounter << G4endl;*/
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
