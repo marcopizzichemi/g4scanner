@@ -57,17 +57,12 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
   private:
     G4GeneralParticleSource* fParticleGun;
     PrimaryGeneratorMessenger* fGunMessenger;
-    G4double sourcex;
-    G4double sourcey;
-    G4double sourcez;
-    G4double distance0;
-    G4double distance1;
+    std::vector<G4double> sourcex, sourcey, sourcez;
+    std::vector<G4double> distance_plate0,distance_plate1;
     G4double energy;
     G4double direction;
 
-    G4double theta0;
-    G4double theta1;
-    G4double phi ;
+    std::vector<G4double> theta, phi;
     G4double esrThickness;
     G4double crystalx;
     G4double crystaly;
