@@ -145,19 +145,19 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(ConfigFile& config)
 
   // set energy distribution
   G4SPSEneDistribution *eneDist = fParticleGun->GetCurrentSource()->GetEneDist() ;
-  eneDist->SetEnergyDisType("Mono"); // or gauss
+  eneDist->SetEnergyDisType("Mono");
   eneDist->SetMonoEnergy(energy*keV);
 
   // set position distribution
   G4SPSPosDistribution *posDist = fParticleGun->GetCurrentSource()->GetPosDist();
-  posDist->SetPosDisType("Volume");  // or Point,Plane,Volume,Beam
+  posDist->SetPosDisType("Volume");
   posDist->SetPosDisShape("Sphere");
   posDist->SetRadius(0.5*mm);
   posDist->SetCentreCoords(G4ThreeVector(sourcex*mm,sourcey*mm,sourcez*mm));
 
   // set angular distribution
   G4SPSAngDistribution *angDist = fParticleGun->GetCurrentSource()->GetAngDist();
-  angDist->SetParticleMomentumDirection( G4ThreeVector(0., 0., 1.) );
+  angDist->SetParticleMomentumDirection(G4ThreeVector(0., 0., 1.));
 
 
 }
@@ -175,23 +175,30 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
 
   G4double halfDiagonal =  sqrt(pow((crystalx + esrThickness) * ncrystalx,2.0) + pow( (crystaly + esrThickness) * ncrystaly ,2.0)) / 2.0;
-  //we assume for this test that the 2 modules have the same distance from the center of setup
-  double distance = sqrt(plate_x[0]*plate_x[0] + plate_z[0]*plate_z[0]) - crystalz/2.0;
-  G4double angleLimit = atan(halfDiagonal / distance);
+  //we take into account that the source might not be in the center
+  double distance0 = sqrt(plate_x[0]*plate_x[0] + (plate_z[0]-sourcez)*(plate_z[0]-sourcez)) - crystalz/2.0;
+  double distance1 = sqrt(plate_x[1]*plate_x[1] + (plate_z[1]-sourcez)*(plate_z[1]-sourcez)) - crystalz/2.0;
+
+  G4double angleLimit0 = atan(halfDiagonal / distance0);
+  G4double angleLimit1 = atan(halfDiagonal / distance1);
   //find the limit for acos
-  double acosMin = cos(angleLimit);
+  double acosMin0 = cos(angleLimit0);
+  double acosMin1 = cos(angleLimit1);
   //so acos will have to be generated uniformely between acosMin and +1
-  double randomNum =  G4UniformRand()*(1.0 - acosMin)  + (acosMin);
+  double randomNum0 =  G4UniformRand()*(1.0 - acosMin0)  + (acosMin0);
+  double randomNum1 =  G4UniformRand()*(1.0 - acosMin1)  + (acosMin1);
   //double randomNum =  G4UniformRand()*2.0  -1.0; //random num between -1 and 1
-  theta = acos(randomNum);
+  theta0 = acos(randomNum0);
+  theta1 = acos(randomNum1) + CLHEP::pi;
+
   phi = G4UniformRand() * 2.0 * CLHEP::pi;
 
   G4SPSAngDistribution *angDist = fParticleGun->GetCurrentSource()->GetAngDist();
-  angDist->SetParticleMomentumDirection(G4ThreeVector(sin(theta)*sin(phi),sin(theta)*cos(phi),cos(theta)));
+
+  angDist->SetParticleMomentumDirection(G4ThreeVector(sin(theta0)*sin(phi),sin(theta0)*cos(phi),cos(theta0)));
   fParticleGun->GeneratePrimaryVertex(anEvent);
 
-  theta = theta + CLHEP::pi;
-  angDist->SetParticleMomentumDirection(G4ThreeVector(sin(theta)*sin(phi),sin(theta)*cos(phi),cos(theta)));
+  angDist->SetParticleMomentumDirection(G4ThreeVector(sin(theta1)*sin(phi),sin(theta1)*cos(phi),cos(theta1)));
   fParticleGun->GeneratePrimaryVertex(anEvent);
 
 }

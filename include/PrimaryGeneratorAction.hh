@@ -60,11 +60,13 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
     G4double sourcex;
     G4double sourcey;
     G4double sourcez;
-    G4double distance;
+    G4double distance0;
+    G4double distance1;
     G4double energy;
     G4double direction;
 
-    G4double theta;
+    G4double theta0;
+    G4double theta1;
     G4double phi ;
     G4double esrThickness;
     G4double crystalx;
