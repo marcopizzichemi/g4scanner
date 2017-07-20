@@ -148,7 +148,6 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(ConfigFile& config)
     G4SPSPosDistribution *posDist = fParticleGun->GetCurrentSource()->GetPosDist();
     posDist->SetPosDisType("Volume");
     posDist->SetPosDisShape("Sphere");
-    //FIXME
     posDist->SetRadius(0.5*mm);
     posDist->SetCentreCoords(G4ThreeVector(sourcex[i]*mm,sourcey[i]*mm,sourcez[i]*mm));
 
@@ -183,30 +182,38 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
   fParticleGun->SetCurrentSourceto(i);
 
-  G4double halfDiagonal =  sqrt(pow((crystalx + esrThickness) * ncrystalx,2.0) + pow( (crystaly + esrThickness) * ncrystaly ,2.0)) / 2.0;
+  G4double Diagonal =  sqrt(pow((crystalx + esrThickness) * ncrystalx,2.0) + pow( (crystaly + esrThickness) * ncrystaly ,2.0));
   //we take into account that the source might not be in the center
-  distance_plate0.push_back(sqrt(plate_x[0]*plate_x[0] + (plate_z[0]-sourcez[i])*(plate_z[0]-sourcez[i])) - crystalz/2.0);
-  distance_plate1.push_back(sqrt(plate_x[1]*plate_x[1] + (plate_z[1]-sourcez[i])*(plate_z[1]-sourcez[i])) - crystalz/2.0);
+  distance_plate0.push_back(sqrt((plate_x[0]-sourcex[i])*(plate_x[0]-sourcex[i]) + (plate_y[0]-sourcey[i])*(plate_y[0]-sourcey[i]) + (plate_z[0]-sourcez[i])*(plate_z[0]-sourcez[i])) - crystalz/2.0);
+  distance_plate1.push_back(sqrt((plate_x[1]-sourcex[i])*(plate_x[1]-sourcex[i]) + (plate_y[1]-sourcey[i])*(plate_y[1]-sourcey[i]) + (plate_z[1]-sourcez[i])*(plate_z[1]-sourcez[i])) - crystalz/2.0);
 
   //choose the minimum distance, so we are sure the gamma will hit all the crystals
-  G4double angleLimit = atan(halfDiagonal / std::min(distance_plate0[i],distance_plate1[i]));
+  G4double angleLimit = atan(Diagonal / std::max(distance_plate0[i],distance_plate1[i]));
   //find the limit for acos
   double acosMin = cos(angleLimit);
   //so acos will have to be generated uniformely between acosMin and +1
   double randomNum =  G4UniformRand()*(1.0 - acosMin)  + (acosMin);
   theta[i] = acos(randomNum);
 
+
   phi[i] = G4UniformRand() * 2.0 * CLHEP::pi;
+  G4cout << phi[i] << G4endl;
+
+
+  //number of plate (0 or 1) furthest to the source (we're only interested in coincidences)
+  int Nmaxplate = 0;
+  if (std::max(distance_plate0[i],distance_plate1[i]) == distance_plate1[i]) { Nmaxplate = 1; }
+
+  //random vector to cover all the plate
+  G4ThreeVector randomDirection = G4ThreeVector(sin(theta[i])*sin(phi[i]),sin(theta[i])*cos(phi[i]),cos(theta[i]));
 
   G4SPSAngDistribution *angDist = fParticleGun->GetCurrentSource()->GetAngDist();
   //generate first gamma
-  angDist->SetParticleMomentumDirection(G4ThreeVector(sin(theta[i])*sin(phi[i]),sin(theta[i])*cos(phi[i]),cos(theta[i])));
+  angDist->SetParticleMomentumDirection(pow(-1,Nmaxplate)*randomDirection);
   fParticleGun->GeneratePrimaryVertex(anEvent);
 
   //generate second gamma (back to back)
-  theta[i] = theta[i] + CLHEP::pi;
-  angDist->SetParticleMomentumDirection(G4ThreeVector(sin(theta[i])*sin(phi[i]),sin(theta[i])*cos(phi[i]),cos(theta[i])));
-
+  angDist->SetParticleMomentumDirection(-(pow(-1,Nmaxplate)*randomDirection));
   fParticleGun->GeneratePrimaryVertex(anEvent);
 }
 
