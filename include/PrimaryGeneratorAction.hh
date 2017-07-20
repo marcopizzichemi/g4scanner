@@ -57,6 +57,8 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
   private:
     G4GeneralParticleSource* fParticleGun;
     PrimaryGeneratorMessenger* fGunMessenger;
+    std::string sourcex_s,sourcey_s,sourcez_s;
+    std::vector<std::string> sourcex_f,sourcey_f,sourcez_f;
     std::vector<G4double> sourcex, sourcey, sourcez;
     std::vector<G4double> distance_plate0,distance_plate1;
     G4double energy;
