@@ -308,6 +308,9 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
 	CreateTree::Instance()->PosXEnDep[numb].push_back(positionVector.getX());
 	CreateTree::Instance()->PosYEnDep[numb].push_back(positionVector.getY());
 	CreateTree::Instance()->PosZEnDep[numb].push_back(positionVector.getZ());
+  //add global time
+  G4double globalTime = track->GetGlobalTime();
+  CreateTree::Instance()->CryGlobalTime[numb].push_back(globalTime/CLHEP::ns);
       }
     }
   }
