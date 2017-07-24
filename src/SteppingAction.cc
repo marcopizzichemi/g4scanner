@@ -261,8 +261,44 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   }
   else //there's only gammas and electrons. for them, we want to know where they left energy (opticalphoton don't really leave any)
   {
-    G4double edep;
+    G4double edep = 0;
     edep = step->GetTotalEnergyDeposit()/CLHEP::MeV; //check if there was an energy deposition
+
+    /*
+    G4ThreeVector positionVectorOut = track->GetStep()->GetPostStepPoint()->GetPosition(); //get the position vector
+    G4cout << ParticleName << " ID=" << track->GetTrackID() << " ParentID=" << track->GetParentID() <<
+    " - En.Dep " << edep << " - " ;
+    G4cout << "(" << positionVectorOut.getX() << "," << positionVectorOut.getY() << "," << positionVectorOut.getZ() << ") - ";
+    G4cout << step->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName() << G4endl;
+    */
+   if(track->GetTrackID()==1 && ParticleName == "gamma" && materialName == "LYSO")
+        {
+          G4String crystalName = step->GetPreStepPoint()->GetPhysicalVolume()->GetName();
+          int numb;
+          std::istringstream ( crystalName ) >> numb;
+
+          if(step->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName() == "compt")
+          {
+            G4ThreeVector positionVectorCompt = track->GetStep()->GetPostStepPoint()->GetPosition(); //get the position vector
+            CreateTree::Instance()->PosComptX[numb].push_back(positionVectorCompt.getX());
+            CreateTree::Instance()->PosComptY[numb].push_back(positionVectorCompt.getY());
+            CreateTree::Instance()->PosComptZ[numb].push_back(positionVectorCompt.getZ());
+            G4double comptTime = track->GetGlobalTime(); //get time
+            CreateTree::Instance()->TimeCompt[numb].push_back(comptTime/CLHEP::ns);;
+            std::cout << "compt" << std::endl;
+          }
+          else if(step->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName() == "phot")
+          {
+            G4ThreeVector positionVectorPhot = track->GetStep()->GetPostStepPoint()->GetPosition(); //get the position vector
+            CreateTree::Instance()->PosPhotX[numb].push_back(positionVectorPhot.getX());
+            CreateTree::Instance()->PosPhotY[numb].push_back(positionVectorPhot.getY());
+            CreateTree::Instance()->PosPhotZ[numb].push_back(positionVectorPhot.getZ());
+            G4double photTime = track->GetGlobalTime(); //get time
+            CreateTree::Instance()->TimePhot[numb].push_back(photTime/CLHEP::ns);
+            std::cout << "phot" << std::endl;
+          }
+        }
+
     if(edep != 0) //if there was en dep, save the data
     {
       if(materialName == "LYSO") //if the electron is interacting with the detector, it does a huge number of cherenkov
