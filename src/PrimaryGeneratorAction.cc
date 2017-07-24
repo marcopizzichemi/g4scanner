@@ -33,11 +33,11 @@
 #include "Randomize.hh"
 
 #include "G4Event.hh"
-#include "G4GeneralParticleSourceCustom.hh"
 #include "G4ParticleTable.hh"
 #include "G4ParticleDefinition.hh"
 #include "G4SystemOfUnits.hh"
 #include "G4ParticleGun.hh"
+#include "G4SPSRandomGenerator.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -124,43 +124,31 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(ConfigFile& config)
     sourcez.push_back(atof(sourcez_f[i].c_str()));
   }
 
-
-  fParticleGun = new G4GeneralParticleSourceCustom();
+  G4int n_particle = 1;
+  fParticleGun = new G4ParticleGun(n_particle);
 
   //definition of particle
   G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
   G4ParticleDefinition* particle = particleTable->FindParticle("gamma");
   fParticleGun->SetParticleTime(0.0*ns);
+  fParticleGun->SetParticleDefinition(particle);
+
 
   //LOOP ON SOURCES: DEFAULT KINEMATICS
-  //fix shape and dimensions, now they are all the same
   for(unsigned int i=0; i<sourcex.size(); i++)
   {
-    fParticleGun->AddaSource(1);
-    fParticleGun->GetCurrentSource()->SetParticleDefinition(particle);
+    //set default position
+    fParticleGun->SetParticlePosition(G4ThreeVector(sourcex[i],sourcey[i],sourcez[i]));
 
-    // set energy distribution
-    G4SPSEneDistribution *eneDist = fParticleGun->GetCurrentSource()->GetEneDist() ;
-    eneDist->SetEnergyDisType("Mono");
-    eneDist->SetMonoEnergy(energy*keV);
+    //set default momentum direction
+    fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0., 0., 1.));
 
-    // set position distribution
-    G4SPSPosDistribution *posDist = fParticleGun->GetCurrentSource()->GetPosDist();
-    posDist->SetPosDisType("Volume");
-    posDist->SetPosDisShape("Sphere");
-    posDist->SetRadius(0.5*mm);
-    posDist->SetCentreCoords(G4ThreeVector(sourcex[i]*mm,sourcey[i]*mm,sourcez[i]*mm));
-
-    // set angular distribution
-    G4SPSAngDistribution *angDist = fParticleGun->GetCurrentSource()->GetAngDist();
-    angDist->SetParticleMomentumDirection(G4ThreeVector(0., 0., 1.));
+    //set energy
+    fParticleGun->SetParticleEnergy(energy*keV);
 
     theta.push_back(0);
     phi.push_back(0);
   }
-
-  //hack to make the loop on the sources
-  fParticleGun->DeleteaSource(0);
 
 }
 
@@ -180,7 +168,22 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   int nSources = sourcex.size();
   int i = round(G4UniformRand()*nSources-0.5);
 
-  fParticleGun->SetCurrentSourceto(i);
+  //position of the source: randomize around chosen center in sphere volume
+  radius = 1.5; //mm
+  randx = radius*2.;
+  randy = radius*2.;
+  randz = radius*2.;
+  G4SPSRandomGenerator* posRndm = new G4SPSRandomGenerator();
+
+  while(((randx*randx)+(randy*randy)+(randz*randz)) > (radius*radius))
+  {
+    randx = ((posRndm->GenRandX())*2.*radius) - radius;
+    randy = ((posRndm->GenRandY())*2.*radius) - radius;
+    randz = ((posRndm->GenRandZ())*2.*radius) - radius;
+  }
+  fParticleGun->SetParticlePosition(G4ThreeVector((sourcex[i]+randx)*mm,(sourcey[i]+randy)*mm,(sourcez[i]+randz)*mm));
+
+  //emission of the source
 
   G4double Diagonal =  sqrt(pow((crystalx + esrThickness) * ncrystalx,2.0) + pow( (crystaly + esrThickness) * ncrystaly ,2.0));
   //we take into account that the source might not be in the center
@@ -197,7 +200,6 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
 
   phi[i] = G4UniformRand() * 2.0 * CLHEP::pi;
-  G4cout << phi[i] << G4endl;
 
 
   //number of plate (0 or 1) furthest to the source (we're only interested in coincidences)
@@ -207,14 +209,19 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   //random vector to cover all the plate
   G4ThreeVector randomDirection = G4ThreeVector(sin(theta[i])*sin(phi[i]),sin(theta[i])*cos(phi[i]),cos(theta[i]));
 
-  G4SPSAngDistribution *angDist = fParticleGun->GetCurrentSource()->GetAngDist();
   //generate first gamma
-  angDist->SetParticleMomentumDirection(pow(-1,Nmaxplate)*randomDirection);
+  fParticleGun->SetParticleMomentumDirection(pow(-1,Nmaxplate)*randomDirection);
   fParticleGun->GeneratePrimaryVertex(anEvent);
 
   //generate second gamma (back to back)
-  angDist->SetParticleMomentumDirection(-(pow(-1,Nmaxplate)*randomDirection));
+  fParticleGun->SetParticleMomentumDirection(-(pow(-1,Nmaxplate)*randomDirection));
   fParticleGun->GeneratePrimaryVertex(anEvent);
+
+  //debug
+  G4cout << "Number of source: " << i
+         << "\nPosition of source: " << (fParticleGun->GetParticlePosition()).getX() << "\t"
+         << (fParticleGun->GetParticlePosition()).getY() << "\t"
+         << (fParticleGun->GetParticlePosition()).getZ() << "\t" << G4endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

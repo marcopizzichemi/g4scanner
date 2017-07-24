@@ -36,7 +36,7 @@
 #include "ConfigFile.h"
 #include <vector>
 
-class G4GeneralParticleSource;
+class G4ParticleGun;
 class G4Event;
 class PrimaryGeneratorMessenger;
 
@@ -55,7 +55,7 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 //     void SetOptPhotonPolar(G4double);
 
   private:
-    G4GeneralParticleSource* fParticleGun;
+    G4ParticleGun* fParticleGun;
     PrimaryGeneratorMessenger* fGunMessenger;
     std::string sourcex_s,sourcey_s,sourcez_s;
     std::vector<std::string> sourcex_f,sourcey_f,sourcez_f;
@@ -78,6 +78,8 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
     std::string plate_x_s,plate_y_s,plate_z_s,rotation_s;
     std::vector<std::string> plate_x_f,plate_y_f,plate_z_f,rotation_f;
     std::vector<G4double>    plate_x,plate_y,plate_z,rotation;
+    G4double radius;
+    G4double randx, randy, randz;
 
 
 };
