@@ -38,6 +38,7 @@
 #include "G4SystemOfUnits.hh"
 #include "G4ParticleGun.hh"
 #include "G4SPSRandomGenerator.hh"
+#include <assert.h>     /* assert */
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -218,10 +219,10 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   fParticleGun->GeneratePrimaryVertex(anEvent);
 
   //debug
-  G4cout << "Number of source: " << i
-         << "\nPosition of source: " << (fParticleGun->GetParticlePosition()).getX() << "\t"
-         << (fParticleGun->GetParticlePosition()).getY() << "\t"
-         << (fParticleGun->GetParticlePosition()).getZ() << "\t" << G4endl;
+//   G4cout << "Number of source: " << i
+//          << "\nPosition of source: " << (fParticleGun->GetParticlePosition()).getX() << "\t"
+//          << (fParticleGun->GetParticlePosition()).getY() << "\t"
+//          << (fParticleGun->GetParticlePosition()).getZ() << "\t" << G4endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

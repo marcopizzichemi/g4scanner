@@ -58,6 +58,7 @@
 #include <TNamed.h>
 #include <TString.h>
 #include <time.h>
+#include <TROOT.h>
 
 #include "TRandom1.h"
 
@@ -87,6 +88,13 @@ int main(int argc,char** argv)
     G4cerr << "   note: -m -r -o options are optional" << G4endl;
     exit(0);
   }
+  
+  //HACK to use the dictionary easily
+  std::string executable = argv[0];
+  std::string execPath = executable.substr(0,executable.find_last_of("/")+1); //very platform dependent..
+  std::string command = ".L " + execPath + "structDictionary.C+";
+  G4cout << "command " << command << G4endl;
+  gROOT->ProcessLine(command.c_str());
   
   //----------------------------------------------------------//
   //  Parse the config file                                   //
@@ -417,7 +425,7 @@ int main(int argc,char** argv)
 //   CreateTree* mytree = new CreateTree("StandardTree",ncrystalx,ncrystaly,nmppcx,nmppcy,true,true);
   
   
-  CreateTree* mytree = new CreateTree("StandardTree",ncrystalx*ncrystaly*modules*plates,nmppcx*nmppcy*modules*plates);
+  CreateTree* mytree = new CreateTree("StandardTree",nmppcx*modules,nmppcy*modules,plates);
   //((CreateTree*)mytree)->SetModuleElements(ncrystalx,ncrystaly,nmppcx,nmppcy);
   //mytree->SetModuleElements(ncrystalx,ncrystaly,nmppcx,nmppcy);
   

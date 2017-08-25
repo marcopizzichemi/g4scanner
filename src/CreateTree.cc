@@ -1,49 +1,36 @@
 #include "CreateTree.hh"
 #include <sstream>
 #include "TROOT.h"
+// #include "struct.hh"
 
 CreateTree* CreateTree::fInstance = NULL;
 
 using namespace std;
 
-CreateTree::CreateTree(TString name, int x, int y)
-  : nCrystals(x),
-    nDetectors(y)
+CreateTree::CreateTree(TString name, int x, int y, int z)
+: 
+nDetectorsX(x),
+nDetectorsY(y),
+nPlates(z)
 {
 
   //G4cout << "DETECTORS "  << " " << nDetectorsX << " " << nDetectorsY << G4endl; ;
-
-  //create the vectors
-  DetectorHit         = new Short_t [nDetectors];
-  CryEnergyDeposited  = new std::vector<float> [nCrystals];
-  pCryEnergyDeposited = new std::vector<float>* [nCrystals];
-  CryGlobalTime       = new std::vector<float> [nCrystals];
-  pCryGlobalTime      = new std::vector<float>* [nCrystals];
-  PosXEnDep           = new std::vector<float> [nCrystals];
-  pPosXEnDep          = new std::vector<float>* [nCrystals];
-  PosYEnDep           = new std::vector<float> [nCrystals];
-  pPosYEnDep          = new std::vector<float>* [nCrystals];
-  PosZEnDep           = new std::vector<float> [nCrystals];
-  pPosZEnDep          = new std::vector<float>* [nCrystals];
-  PosComptX           = new std::vector<float> [nCrystals];
-  pPosComptX          = new std::vector<float>* [nCrystals];
-  PosComptY           = new std::vector<float> [nCrystals];
-  pPosComptY          = new std::vector<float>* [nCrystals];
-  PosComptZ           = new std::vector<float> [nCrystals];
-  pPosComptZ          = new std::vector<float>* [nCrystals];
-  PosPhotX            = new std::vector<float> [nCrystals];
-  pPosPhotX           = new std::vector<float>* [nCrystals];
-  PosPhotY            = new std::vector<float> [nCrystals];
-  pPosPhotY           = new std::vector<float>* [nCrystals];
-  PosPhotZ            = new std::vector<float> [nCrystals];
-  pPosPhotZ           = new std::vector<float>* [nCrystals];
-  TimeCompt           = new std::vector<float> [nCrystals];
-  pTimeCompt          = new std::vector<float>* [nCrystals];
-  TimePhot            = new std::vector<float> [nCrystals];
-  pTimePhot           = new std::vector<float>* [nCrystals];
-
-
   gROOT->ProcessLine("#include <vector>"); //this is needed otherwise ROOT will complain about not knowing what a std::vector is...
+
+
+  // gROOT->ProcessLine(".L ./structDictionary.C+");
+  //create the vectors
+  DetectorHit         = new Short_t [nDetectorsX*nDetectorsY*nPlates];
+  // CryEnergyDeposited  = new std::vector<float> [nCrystalsX*nCrystalsY];
+  // pCryEnergyDeposited = new std::vector<float>* [nCrystalsX*nCrystalsY];
+  // PosXEnDep           = new std::vector<float> [nCrystalsX*nCrystalsY];
+  // pPosXEnDep          = new std::vector<float>* [nCrystalsX*nCrystalsY];
+  // PosYEnDep           = new std::vector<float> [nCrystalsX*nCrystalsY];
+  // pPosYEnDep          = new std::vector<float>* [nCrystalsX*nCrystalsY];
+  // PosZEnDep           = new std::vector<float> [nCrystalsX*nCrystalsY];
+  // pPosZEnDep          = new std::vector<float>* [nCrystalsX*nCrystalsY];
+
+
   if(fInstance)
   {
     return;
@@ -60,78 +47,65 @@ CreateTree::CreateTree(TString name, int x, int y)
   this->GetTree()->Branch("Seed",&this->Seed,"Seed/L");
   this->GetTree()->Branch("Run",&this->Run,"Run/I");
   this->GetTree()->Branch("Event",&this->Event,"Event/I");
+  this->GetTree()->Branch("SourceX",&this->SourceX,"SourceX/F");
+  this->GetTree()->Branch("SourceY",&this->SourceY,"SourceY/F");
+  this->GetTree()->Branch("SourceZ",&this->SourceZ,"SourceZ/F");
+  this->GetTree()->Branch("SourceMomentumX",&this->SourceMomentumX,"SourceMomentumX/F");
+  this->GetTree()->Branch("SourceMomentumY",&this->SourceMomentumY,"SourceMomentumY/F");
+  this->GetTree()->Branch("SourceMomentumZ",&this->SourceMomentumZ,"SourceMomentumZ/F");
   this->GetTree()->Branch("totalEnergyDeposited",&this->totalEnergyDeposited,"totalEnergyDeposited/F");
   this->GetTree()->Branch("NumOptPhotons",&this->NumOptPhotons,"NumOptPhotons/I");
   this->GetTree()->Branch("NumCherenkovPhotons",&this->NumCherenkovPhotons,"NumCherenkovPhotons/I");
-
-  for(int i = 0; i < nCrystals ; i++)
-  {
-    pCryEnergyDeposited[i] = &CryEnergyDeposited[i];
-    pCryGlobalTime[i] = &CryGlobalTime[i];
-    pPosXEnDep[i] = &PosXEnDep[i];
-    pPosYEnDep[i] = &PosYEnDep[i];
-    pPosZEnDep[i] = &PosZEnDep[i];
-    pPosComptX[i] = &PosComptX[i];
-    pPosComptY[i] = &PosComptY[i];
-    pPosComptZ[i] = &PosComptZ[i];
-    pPosPhotX[i]  = &PosPhotX[i];
-    pPosPhotY[i]  = &PosPhotY[i];
-    pPosPhotZ[i]  = &PosPhotZ[i];
-    pTimeCompt[i] = &TimeCompt[i];
-    pTimePhot[i]  = &TimePhot[i];
-  }
-
-  for (int i = 0 ; i < nCrystals ; i++)
-  {
-    std::stringstream snames;
-    snames << "cry" << i;
-    this->GetTree()->Branch(snames.str().c_str(),"std::vector<float>",&pCryEnergyDeposited[i]);
-    snames.str("");
-    snames<< "cry" << i << "GlobalTime";
-    this->GetTree()->Branch(snames.str().c_str(),"std::vector<float>",&pCryGlobalTime[i]);
-    snames.str("");
-    snames<< "cry" << i << "PosXEnDep";
-    this->GetTree()->Branch(snames.str().c_str(),"std::vector<float>",&pPosXEnDep[i]);
-    snames.str("");
-    snames<< "cry" << i << "PosYEnDep";
-    this->GetTree()->Branch(snames.str().c_str(),"std::vector<float>",&pPosYEnDep[i]);
-    snames.str("");
-    snames<< "cry" << i << "PosZEnDep";
-    this->GetTree()->Branch(snames.str().c_str(),"std::vector<float>",&pPosZEnDep[i]);
-    snames.str("");
-    snames<< "cry" << i << "PosComptX";
-    this->GetTree()->Branch(snames.str().c_str(),"std::vector<float>",&pPosComptX[i]);
-    snames.str("");
-    snames<< "cry" << i << "PosComptY";
-    this->GetTree()->Branch(snames.str().c_str(),"std::vector<float>",&pPosComptY[i]);
-    snames.str("");
-    snames<< "cry" << i << "PosComptZ";
-    this->GetTree()->Branch(snames.str().c_str(),"std::vector<float>",&pPosComptZ[i]);
-    snames.str("");
-    snames<< "cry" << i << "PosPhotX";
-    this->GetTree()->Branch(snames.str().c_str(),"std::vector<float>",&pPosPhotX[i]);
-    snames.str("");
-    snames<< "cry" << i << "PosPhotY";
-    this->GetTree()->Branch(snames.str().c_str(),"std::vector<float>",&pPosPhotY[i]);
-    snames.str("");
-    snames<< "cry" << i << "PosPhotZ";
-    this->GetTree()->Branch(snames.str().c_str(),"std::vector<float>",&pPosPhotZ[i]);
-    snames.str("");
-    snames<< "cry" << i << "TimeCompt";
-    this->GetTree()->Branch(snames.str().c_str(),"std::vector<float>",&pTimeCompt[i]);
-    snames.str("");
-    snames<< "cry" << i << "TimePhot";
-    this->GetTree()->Branch(snames.str().c_str(),"std::vector<float>",&pTimePhot[i]);
-    snames.str("");
-  }
-
-  for (int i = 0 ; i < nDetectors ; i++)
+  this->GetTree()->Branch("energyDeposition","std::vector<enDep>",&energyDeposition);
+  this->GetTree()->Branch("optical","std::vector<optPhot>",&photons);
+  for (int i = 0 ; i < nDetectorsX*nDetectorsY*nPlates ; i++)
   {
     std::stringstream snames,stypes;
     snames << "detector" << i;
     stypes << "detector" << i << "/S";
     this->GetTree()->Branch(snames.str().c_str(),&DetectorHit[i],stypes.str().c_str());
   }
+  exitFound = false;
+  exitFace = 0;
+  FoundGammaFirstEntrance = false;
+  FoundGammaVertexMomentum = false;
+  // default to 0
+  //exit face legend:
+  // 0 - no exit was found among the next possibilities
+  // 1 - exit from front face (face coupled to MPPC)
+  // 2 - exit from back face (face opposite to MPPC)
+
+
+  // this->GetTree()->Branch("exitFound",&this->exitFound,"exitFound/B");
+
+  // for(int i = 0; i < nCrystalsX*nCrystalsY ; i++)
+  // {
+  //   pCryEnergyDeposited[i] = &CryEnergyDeposited[i];
+  //   pPosXEnDep[i] = &PosXEnDep[i];
+  //   pPosYEnDep[i] = &PosYEnDep[i];
+  //   pPosZEnDep[i] = &PosZEnDep[i];
+  // }
+
+
+
+  // for (int i = 0 ; i < nCrystalsX*nCrystalsY ; i++)
+  // {
+  //   std::stringstream snames;
+  //   snames << "cry" << i;
+  //   this->GetTree()->Branch(snames.str().c_str(),"std::vector<float>",&pCryEnergyDeposited[i]);
+  //   snames.str("");
+  //   snames<< "cry" << i << "PosXEnDep";
+  //   this->GetTree()->Branch(snames.str().c_str(),"std::vector<float>",&pPosXEnDep[i]);
+  //   snames.str("");
+  //   snames<< "cry" << i << "PosYEnDep";
+  //   this->GetTree()->Branch(snames.str().c_str(),"std::vector<float>",&pPosYEnDep[i]);
+  //   snames.str("");
+  //   snames<< "cry" << i << "PosZEnDep";
+  //   this->GetTree()->Branch(snames.str().c_str(),"std::vector<float>",&pPosZEnDep[i]);
+  // }
+
+
+
 
   // 	pTransmissionX = &TransmissionX;
   // 	pTransmissionY = &TransmissionY;
@@ -141,38 +115,47 @@ CreateTree::CreateTree(TString name, int x, int y)
   // 	this->GetTree()->Branch("TransmissionY","std::vector<float>",&pTransmissionY);
   // 	this->GetTree()->Branch("TransmissionZ","std::vector<float>",&pTransmissionZ);
   //
-  pPositionX = &PositionX;
-  pPositionY = &PositionY;
-  pPositionZ = &PositionZ;
 
-  this->GetTree()->Branch("PositionX","std::vector<float>",&pPositionX);
-  this->GetTree()->Branch("PositionY","std::vector<float>",&pPositionY);
-  this->GetTree()->Branch("PositionZ","std::vector<float>",&pPositionZ);
 
-  pPreMomentumX = &PreMomentumX;
-  pPreMomentumY = &PreMomentumY;
-  pPreMomentumZ = &PreMomentumZ;
-
-  this->GetTree()->Branch("PreMomentumX","std::vector<float>",&pPreMomentumX);
-  this->GetTree()->Branch("PreMomentumY","std::vector<float>",&pPreMomentumY);
-  this->GetTree()->Branch("PreMomentumZ","std::vector<float>",&pPreMomentumZ);
-
-  pPostMomentumX = &PostMomentumX;
-  pPostMomentumY = &PostMomentumY;
-  pPostMomentumZ = &PostMomentumZ;
-
-  this->GetTree()->Branch("PostMomentumX","std::vector<float>",&pPostMomentumX);
-  this->GetTree()->Branch("PostMomentumY","std::vector<float>",&pPostMomentumY);
-  this->GetTree()->Branch("PostMomentumZ","std::vector<float>",&pPostMomentumZ);
-
-  pGlobalTime = &GlobalTime;
-  this->GetTree()->Branch("GlobalTime","std::vector<float>",&pGlobalTime);
-
-  pPhotonType = &PhotonType;
-  this->GetTree()->Branch("PhotonType","std::vector<int>",&pPhotonType);
-
-  pPhotonEnergy = &PhotonEnergy;
-  this->GetTree()->Branch("PhotonEnergy","std::vector<float>",&pPhotonEnergy);
+  //
+  //
+  // pPositionX = &PositionX;
+  // pPositionY = &PositionY;
+  // pPositionZ = &PositionZ;
+  //
+  // this->GetTree()->Branch("PositionX","std::vector<float>",&pPositionX);
+  // this->GetTree()->Branch("PositionY","std::vector<float>",&pPositionY);
+  // this->GetTree()->Branch("PositionZ","std::vector<float>",&pPositionZ);
+  //
+  // pPreMomentumX = &PreMomentumX;
+  // pPreMomentumY = &PreMomentumY;
+  // pPreMomentumZ = &PreMomentumZ;
+  //
+  // this->GetTree()->Branch("PreMomentumX","std::vector<float>",&pPreMomentumX);
+  // this->GetTree()->Branch("PreMomentumY","std::vector<float>",&pPreMomentumY);
+  // this->GetTree()->Branch("PreMomentumZ","std::vector<float>",&pPreMomentumZ);
+  //
+  // pPostMomentumX = &PostMomentumX;
+  // pPostMomentumY = &PostMomentumY;
+  // pPostMomentumZ = &PostMomentumZ;
+  //
+  // this->GetTree()->Branch("PostMomentumX","std::vector<float>",&pPostMomentumX);
+  // this->GetTree()->Branch("PostMomentumY","std::vector<float>",&pPostMomentumY);
+  // this->GetTree()->Branch("PostMomentumZ","std::vector<float>",&pPostMomentumZ);
+  //
+  // pGlobalTime = &GlobalTime;
+  // this->GetTree()->Branch("GlobalTime","std::vector<float>",&pGlobalTime);
+  //
+  // pPhotonType = &PhotonType;
+  // this->GetTree()->Branch("PhotonType","std::vector<int>",&pPhotonType);
+  //
+  // pPhotonEnergy = &PhotonEnergy;
+  // this->GetTree()->Branch("PhotonEnergy","std::vector<float>",&pPhotonEnergy);
+  //
+  // pOriginCrystalI = &OriginCrystalI;
+  // pOriginCrystalJ = &OriginCrystalJ;
+  // this->GetTree()->Branch("OriginCrystalI","std::vector<int>",&pOriginCrystalI);
+  // this->GetTree()->Branch("OriginCrystalJ","std::vector<int>",&pOriginCrystalJ);
 
   this->Clear();
 }
@@ -180,32 +163,15 @@ CreateTree::CreateTree(TString name, int x, int y)
 CreateTree::~CreateTree()
 {
   delete DetectorHit;
-  delete CryEnergyDeposited;
-  delete pCryEnergyDeposited;
-  delete CryGlobalTime;
-  delete pGlobalTime;
-  delete PosXEnDep ;
-  delete pPosXEnDep;
-  delete PosYEnDep;
-  delete pPosYEnDep;
-  delete PosZEnDep;
-  delete pPosZEnDep;
-  delete PosComptX;
-  delete PosComptY;
-  delete PosComptZ;
-  delete PosPhotX;
-  delete PosPhotY;
-  delete PosPhotZ;
-  delete TimeCompt;
-  delete TimePhot;
-  delete pPosComptX;
-  delete pPosComptY;
-  delete pPosComptZ;
-  delete pPosPhotX;
-  delete pPosPhotY;
-  delete pPosPhotZ;
-  delete pTimeCompt;
-  delete pTimePhot;
+  // delete CryEnergyDeposited;
+  // delete pCryEnergyDeposited;
+  // delete PosXEnDep ;
+  // delete pPosXEnDep;
+  // delete PosYEnDep;
+  // delete pPosYEnDep;
+  // delete PosZEnDep;
+  // delete pPosZEnDep;
+  // delete photons;
 }
 
 Bool_t CreateTree::Write()
@@ -223,28 +189,26 @@ void CreateTree::Clear()
 {
   Run=0;
   Event=0;
+  SourceX=0;
+  SourceY=0;
+  SourceZ=0;
+  SourceMomentumX=0;
+  SourceMomentumY=0;
+  SourceMomentumZ=0;
+
   NumOptPhotons=0;
   NumCherenkovPhotons=0;
   totalEnergyDeposited=0;
 
-  for(int i = 0; i < nCrystals ; i++)
-  {
-    CryEnergyDeposited[i].clear();
-    CryGlobalTime[i].clear();
-    PosXEnDep[i].clear();
-    PosYEnDep[i].clear();
-    PosZEnDep[i].clear();
-    PosComptX[i].clear();
-    PosComptY[i].clear();
-    PosComptZ[i].clear();
-    PosPhotX[i].clear();
-    PosPhotY[i].clear();
-    PosPhotZ[i].clear();
-    TimeCompt[i].clear();
-    TimePhot[i].clear();
-  }
+  // for(int i = 0; i < nCrystalsX*nCrystalsY ; i++)
+  // {
+  //   CryEnergyDeposited[i].clear();
+  //   PosXEnDep[i].clear();
+  //   PosYEnDep[i].clear();
+  //   PosZEnDep[i].clear();
+  // }
 
-  for (int i = 0 ; i < nDetectors ; i++)//
+  for (int i = 0 ; i < nDetectorsX*nDetectorsY ; i++)//
   {
     DetectorHit[i] = 0;
   }
@@ -253,19 +217,25 @@ void CreateTree::Clear()
   // 	TransmissionY.clear();
   // 	TransmissionZ.clear();
 
-  PositionX.clear();
-  PositionY.clear();
-  PositionZ.clear();
-
-  PreMomentumX.clear();
-  PreMomentumY.clear();
-  PreMomentumZ.clear();
-
-  PostMomentumX.clear();
-  PostMomentumY.clear();
-  PostMomentumZ.clear();
-
-  GlobalTime.clear();
-  PhotonType.clear();
-  PhotonEnergy.clear();
+  // PositionX.clear();
+  // PositionY.clear();
+  // PositionZ.clear();
+  //
+  // PreMomentumX.clear();
+  // PreMomentumY.clear();
+  // PreMomentumZ.clear();
+  //
+  // PostMomentumX.clear();
+  // PostMomentumY.clear();
+  // PostMomentumZ.clear();
+  //
+  // GlobalTime.clear();
+  // PhotonType.clear();
+  // PhotonEnergy.clear();
+  // OriginCrystalI.clear();
+  // OriginCrystalJ.clear();
+  exitFound = false;
+  exitFace = 0;
+  photons.clear();
+  energyDeposition.clear();
 }

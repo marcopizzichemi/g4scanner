@@ -70,6 +70,7 @@ set(g4scanner_SCRIPTS
     vis.mac
     run.mac
     matrix.cfg
+    structDictionary.C
   )
 
 foreach(_script ${g4scanner_SCRIPTS})
