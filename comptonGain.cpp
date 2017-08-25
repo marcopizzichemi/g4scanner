@@ -753,6 +753,8 @@ int main (int argc, char** argv)
   long int quadrupleCounter = 0;
   long int multipleCounter = 0;
   long int globalReturned = 0;
+  long int HighestCrystalRight = 0;
+  long int HighestCrystalWrong = 0;
   // long int extendedChiGood = 0;
   // long int extendedChiGoodGain = 0;
   // long int extendedChiBad = 0;
@@ -1031,8 +1033,11 @@ int main (int argc, char** argv)
       tempAvgEnDep.sy = sqrt(vary);
       tempAvgEnDep.sz = sqrt(varz);
 
-      //save into the std::vector of averages
-      averageDepEvents.push_back(tempAvgEnDep);
+      //detection threshold
+      if(tempAvgEnDep.energy > 0.05)
+      {  //save into the std::vector of averages
+        averageDepEvents.push_back(tempAvgEnDep);
+      }
     }
 
     //two crystals or more hit, but a crystal is hit more than once (like, 28 -> 36 -> 28)
@@ -1079,25 +1084,47 @@ int main (int argc, char** argv)
       }
       if(averageDepEvents.size() > 2){
         int hit[2] = {0,0};
+        std::vector<float> hitTime[2];
+        std::vector<float> hitEnergy[2];
         for(int iAverage = 0 ; iAverage < averageDepEvents.size(); iAverage++)
         {
           hit[(averageDepEvents[iAverage].id / crystalsPerArray)]++;
-        }
-        if(hit[0] == 1)
-        {
-          if(hit[1] == 2)
-          {
-            tripleCounter++;
-          }
+          hitTime[(averageDepEvents[iAverage].id / crystalsPerArray)].push_back(averageDepEvents[iAverage].time);
+          hitEnergy[(averageDepEvents[iAverage].id / crystalsPerArray)].push_back(averageDepEvents[iAverage].energy);
         }
 
-        if(hit[1] == 1)
+        if( ((hit[0] == 1) && (hit[1] == 2)) || ((hit[0] == 2) && (hit[1] == 1))  )
         {
-          if(hit[0] == 2)
-          {
-            tripleCounter++;
-          }
+          tripleCounter++;
         }
+
+        if( ((hit[0] == 1) && (hit[1] == 2)) || ((hit[0] == 2) && (hit[1] == 1)) || ( (hit[0] == 2) && (hit[1] == 2) ) )
+        {
+          for(int iHit = 0; iHit < 2 ;iHit++)
+          {
+            if(hit[iHit] == 2)
+            {
+              if(hitTime[iHit][0] > hitTime[iHit][1])
+              {
+                if(hitEnergy[iHit][0] > hitEnergy[iHit][1] )
+                  HighestCrystalWrong++;
+                else
+                  HighestCrystalRight++;
+              }
+              else
+              {
+                if(hitEnergy[iHit][0] > hitEnergy[iHit][1] )
+                  HighestCrystalRight++;
+                else
+                  HighestCrystalWrong++;
+              }
+            }
+          }
+
+        }
+
+
+
 
         if(hit[0] == 2)
         {
@@ -2151,6 +2178,9 @@ int main (int argc, char** argv)
   std::cout << "2+2 511 KeV deposition events = "<< quadrupleCounter << std::endl;
   std::cout << "multiple 511 KeV deposition events = "<< multipleCounter << std::endl;
   std::cout << "Returned = " << globalReturned << std::endl;
+  std::cout << "-------------------------------------------------------" << std::endl;
+  std::cout << "Highest Energy Right = "<< HighestCrystalRight << std::endl;
+  std::cout << "Highest Energy Wrong = "<< HighestCrystalWrong << std::endl;
   // std::cout << "Candidates = "<< foundCandidate << std::endl;
   // std::cout << "Good predictions = " << goodCounter << "\t accuracy (" << 100.0*((double) goodCounter)/((double) (foundCandidate)) << " +/- " << 100.0*((double) goodCounter)/((double) (foundCandidate))*sqrt(pow(1.0/sqrt(goodCounter),2) + pow(1.0/sqrt(foundCandidate),2) ) << ")%" << std::endl;
   // std::cout << "Good predictions [only Chi^2] = " << goodChi << "\t accuracy (" << 100.0*((double) goodChi)/((double) (foundCandidate)) << " +/- " << 100.0*((double) goodChi)/((double) (foundCandidate))*sqrt(pow(1.0/sqrt(goodChi),2) + pow(1.0/sqrt(foundCandidate),2) ) << ")%" << std::endl;
