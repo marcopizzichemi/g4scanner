@@ -8,8 +8,7 @@ CreateTree* CreateTree::fInstance = NULL;
 using namespace std;
 
 CreateTree::CreateTree(TString name, int x, int y, int z)
-:
-nDetectorsX(x),
+: nDetectorsX(x),
 nDetectorsY(y),
 nPlates(z)
 {

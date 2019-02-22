@@ -24,7 +24,7 @@
 // ********************************************************************
 //
 //
-// 
+//
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -42,23 +42,23 @@
 class G4Timer;
 class G4Run;
 
-class RunAction : public G4UserRunAction
+class g4matrixRunAction : public G4UserRunAction
 {
-  public:
-    RunAction();
-    virtual ~RunAction();
+public:
+  g4matrixRunAction();
+  virtual ~g4matrixRunAction();
 
-  public:
-    virtual void BeginOfRunAction(const G4Run* aRun);
-    virtual void EndOfRunAction(const G4Run* aRun);
+public:
+  virtual void BeginOfRunAction(const G4Run* aRun);
+  virtual void EndOfRunAction(const G4Run* aRun);
 
-    
-  private:
-    G4Timer* fTimer;
+
+private:
+  G4Timer* fTimer;
 
 };
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#endif /*RunAction_h*/
+#endif /*g4matrixRunAction_h*/

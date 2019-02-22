@@ -38,25 +38,57 @@
 
 class G4ParticleGun;
 class G4Event;
-class PrimaryGeneratorMessenger;
+class g4matrixPrimaryGeneratorMessenger;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
+class g4matrixPrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 {
-  public:
-    PrimaryGeneratorAction(ConfigFile& config);
-    virtual ~PrimaryGeneratorAction();
+public:
+  g4matrixPrimaryGeneratorAction(ConfigFile& config);
+  virtual ~g4matrixPrimaryGeneratorAction();
 
-  public:
-    virtual void GeneratePrimaries(G4Event*);
+public:
+  virtual void GeneratePrimaries(G4Event*);
 
-//     void SetOptPhotonPolar();
-//     void SetOptPhotonPolar(G4double);
+  //     void SetOptPhotonPolar();
+  //     void SetOptPhotonPolar(G4double);
 
-  private:
-    G4ParticleGun* fParticleGun;
-    PrimaryGeneratorMessenger* fGunMessenger;
+private:
+  // G4ParticleGun* fParticleGun;
+  // g4matrixPrimaryGeneratorMessenger* fGunMessenger;
+  // G4double sourcex;
+  // G4double sourcey;
+  // G4double sourcez;
+  // G4double crystalz;
+  // G4double EventSourcex;
+  // G4double EventSourcey;
+  // G4double EventSourcez;
+  // G4double EventTargetx;
+  // G4double EventTargety;
+  // G4double EventTargetz;
+  // G4double greaseBack;
+  // G4double glassBack;
+  // G4double airBack;
+  //
+  // G4double distance;
+  // G4double energy;
+  // G4double direction;
+  // G4double userIrradiationDiagonal;
+  //
+  // G4double sphereRadius;
+  //
+  // G4double theta;
+  // G4double phi ;
+  // G4double esrThickness;
+  // G4double crystalx;
+  // G4double crystaly;
+  // G4int ncrystalx;
+  // G4int ncrystaly;
+  // G4bool backgroudSimulation;
+
+  G4ParticleGun* fParticleGun;
+    g4matrixPrimaryGeneratorMessenger* fGunMessenger;
     std::string sourcex_s,sourcey_s,sourcez_s;
     std::vector<std::string> sourcex_f,sourcey_f,sourcez_f;
     std::vector<G4double> sourcex, sourcey, sourcez;
@@ -86,4 +118,4 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#endif /*PrimaryGeneratorAction_h*/
+#endif /*g4matrixPrimaryGeneratorAction_h*/

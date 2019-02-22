@@ -24,7 +24,7 @@
 // ********************************************************************
 //
 //
-// 
+//
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -46,39 +46,38 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-RunAction::RunAction(/*float* aFloat*/)
- : G4UserRunAction(),
-   fTimer(0)
-   //,pFloat(aFloat)
+g4matrixRunAction::g4matrixRunAction(/*float* aFloat*/)
+: G4UserRunAction(),
+fTimer(0)
+//,pFloat(aFloat)
 {
   fTimer = new G4Timer;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-RunAction::~RunAction()
+g4matrixRunAction::~g4matrixRunAction()
 {
   delete fTimer;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void RunAction::BeginOfRunAction(const G4Run* aRun)
+void g4matrixRunAction::BeginOfRunAction(const G4Run* aRun)
 {
-  
+
   gROOT->ProcessLine("#include <vector>"); //this is needed otherwise ROOT will complain about not knowing what a std::vector is...
   G4cout << "### Run " << aRun->GetRunID() << " start." << G4endl;
   fTimer->Start();
-  
   CreateTree::Instance()->Run = aRun->GetRunID();
-  
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void RunAction::EndOfRunAction(const G4Run* aRun)
+void g4matrixRunAction::EndOfRunAction(const G4Run* aRun)
 {
-  
+
   fTimer->Stop();
   G4cout << "number of event = " << aRun->GetNumberOfEvent() << " " << *fTimer << G4endl;
 

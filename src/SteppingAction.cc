@@ -51,7 +51,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 
-SteppingAction::SteppingAction(
+g4matrixSteppingAction::g4matrixSteppingAction(
   ConfigFile& config)
 : G4UserSteppingAction()
 //fEventAction(eventAction)
@@ -71,15 +71,16 @@ SteppingAction::SteppingAction(
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-SteppingAction::~SteppingAction()
+g4matrixSteppingAction::~g4matrixSteppingAction()
 { ; }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void SteppingAction::UserSteppingAction(const G4Step* step)
+void g4matrixSteppingAction::UserSteppingAction(const G4Step* step)
 {
-  G4int eventNumber = G4RunManager::GetRunManager()->
-  GetCurrentEvent()->GetEventID();
+  // G4cout << "Step begin " << G4endl;
+
+  G4int eventNumber = G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
 
   if (eventNumber != fEventNumber) {
     G4cout << "Number of Scintillation Photons in previous event: "
@@ -98,6 +99,10 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   // if(track->GetTrackStatus())
 
   G4String ParticleName = track->GetDynamicParticle()->GetParticleDefinition()->GetParticleName();
+  G4int PDGEncoding     = track->GetDynamicParticle()->GetParticleDefinition()->GetPDGEncoding();
+  G4int TrackID         = track->GetTrackID();
+  G4int ParentID        = track->GetParentID();
+  // G4String              = track->
   G4String materialName = step->GetPreStepPoint()->GetPhysicalVolume()->GetLogicalVolume()->GetMaterial()->GetName();
 
   G4VPhysicalVolume* thePrePV  = step->GetPreStepPoint() ->GetPhysicalVolume();
@@ -107,7 +112,8 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   G4String PostMaterialName ;
   G4String PreVolumeName;
   G4String PostVolumeName;
-
+  G4String ProcessDefinedName = step->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName();
+  // G4String ProcessDefinedName = aProcess->GetProcessName();
   if(thePrePV)
   {
     PreMaterialName = thePrePV->GetLogicalVolume()->GetMaterial()->GetName();
@@ -116,11 +122,11 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   if(thePostPV) {
     PostMaterialName = thePostPV->GetLogicalVolume()->GetMaterial()->GetName();
     PostVolumeName   = thePostPV->GetName();
+
   }
 
 
   //getting information from the particles
-
   //for opticalphoton, we want to know where they stopped
   if (ParticleName == "opticalphoton") //if it's an opticalphoton
   {
@@ -167,12 +173,17 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
         // G4cout <<  PostVolumeName << G4endl;
         if( ((PostVolumeName == "GreaseFrontCryToGlass") | (PostVolumeName == "GlassFront") | (PostVolumeName == "GreaseFrontGlassToMPPC") | (PostVolumeName == "AirGapCrystalMPPC")))
         {
-          CreateTree::Instance()->exitFace = 1; //FIXME maybe enum? - 0 is front, 1 is back (and 2 lateral?)
+          CreateTree::Instance()->exitFace = 1; //FIXME maybe enum? - 1 is front, 2 is back (and 3 lateral?)
           CreateTree::Instance()->exitFound = true; //first exit has been found
         }
         if( ((PostVolumeName == "GreaseBackCryToGlass") | (PostVolumeName == "GlassBack") | (PostVolumeName == "AirBack")))
         {
-          CreateTree::Instance()->exitFace = 2; //FIXME maybe enum? - 0 is front, 1 is back (and 2 lateral?)
+          CreateTree::Instance()->exitFace = 2; //FIXME maybe enum? - 1 is front, 2 is back (and 3 lateral?)
+          CreateTree::Instance()->exitFound = true; //first exit has been found
+        }
+        else
+        {
+          CreateTree::Instance()->exitFace = 3; //FIXME maybe enum? - 1 is front, 2 is back (and 3 lateral?)
           CreateTree::Instance()->exitFound = true; //first exit has been found
         }
       }
@@ -190,25 +201,12 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
       //record the photon, if QE allows it
       if(rand < quantumEff) //absorb the optical photon, save the relevant data
       {
-
         CreateTree::Instance()->DetectorHit[numb]++;
 
         G4ThreeVector OnDetectorPosition = track->GetStep()->GetPostStepPoint()->GetPosition(); //get the position vector
         G4ThreeVector PreOnDetectorMomentum = track->GetStep()->GetPreStepPoint()->GetMomentumDirection(); //get the momentum, unit vector
         G4ThreeVector PostOnDetectorMomentum = track->GetStep()->GetPostStepPoint()->GetMomentumDirection(); //get the momentum, unit vector
         G4double globalTime = track->GetGlobalTime();
-
-        // CreateTree::Instance()->PositionX.push_back(OnDetectorPosition.getX());
-        // CreateTree::Instance()->PositionY.push_back(OnDetectorPosition.getY());
-        // CreateTree::Instance()->PositionZ.push_back(OnDetectorPosition.getZ());
-        //
-        // CreateTree::Instance()->PreMomentumX.push_back(PreOnDetectorMomentum.getX()/*/CLHEP::nm*/);
-        // CreateTree::Instance()->PreMomentumY.push_back(PreOnDetectorMomentum.getY()/*/CLHEP::nm*/);
-        // CreateTree::Instance()->PreMomentumZ.push_back(PreOnDetectorMomentum.getZ()/*/CLHEP::nm*/);
-        //
-        // CreateTree::Instance()->PostMomentumX.push_back(PostOnDetectorMomentum.getX()/*/CLHEP::nm*/);
-        // CreateTree::Instance()->PostMomentumY.push_back(PostOnDetectorMomentum.getY()/*/CLHEP::nm*/);
-        // CreateTree::Instance()->PostMomentumZ.push_back(PostOnDetectorMomentum.getZ()/*/CLHEP::nm*/);
 
         // get crystal of origin
         //HACK with names=numbers. better solutions will be welcome...
@@ -225,21 +223,6 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
         // G4cout << "iString = " << iString << " , jString = " << jString << G4endl;
         std::istringstream ( iString ) >> iCry;
         std::istringstream ( jString ) >> jCry;
-        // G4cout << "iCry = " << iCry << " , jCry = " << jCry << G4endl;
-        // Short_t numbCrystal;
-        // std::istringstream ( CrystalName ) >> numbCrystal;
-        // CreateTree::Instance()->OriginCrystalI.push_back(iCry);
-        // CreateTree::Instance()->OriginCrystalJ.push_back(jCry);
-        //BEGIN of DEBUG for negative PostMomentumZ
-        // 	if(PostOnDetectorMomentum.getZ() < 0)
-        // 	{
-        // 	  G4cout << "----------------------------------------------------------------------------------------------------------------" << G4endl;
-        // 	  G4cout << "PreMaterialName = " << PreMaterialName << G4endl;
-        // 	  G4cout << "PostMaterialName = " << PostMaterialName << G4endl;
-        // 	  G4cout << "Position = " << OnDetectorPosition.getX() << " " << OnDetectorPosition.getY() << " " << OnDetectorPosition.getZ() << G4endl;
-        // 	  G4cout << "----------------------------------------------------------------------------------------------------------------" << G4endl;
-        // 	}
-        //END of DEBUG for negative PostMomentumZ
 
         optPhot tempPhoton;
         //save the process that created the photon
@@ -281,6 +264,8 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
         tempPhoton.PhotonEnergy = track->GetDynamicParticle()->GetTotalEnergy()/CLHEP::eV;
         tempPhoton.OriginCrystalI = iCry;
         tempPhoton.OriginCrystalJ = jCry;
+        tempPhoton.TrackID        = TrackID;
+        tempPhoton.ParentID       = ParentID;
         if(CreateTree::Instance()->exitFound)
         {
           tempPhoton.ExitFace = CreateTree::Instance()->exitFace;
@@ -300,41 +285,6 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
     }
     //END of test part
 
-
-    //BEGIN of standard method
-    //     if(track->GetTrackStatus()==fStopAndKill) //if it just died here
-    //     {
-    //       if(PostMaterialName == "SilicioMPPC" )
-    //       {
-    // 	//G4cout << PreMaterialName << " " << PostMaterialName << G4endl;
-    // 	G4String detectorName = step->GetPostStepPoint()->GetPhysicalVolume()->GetName();
-    // 	int numb;
-    // 	std::istringstream ( detectorName ) >> numb;
-    //
-    // 	//take into account quantum efficiency
-    // 	G4double rand = G4UniformRand();
-    //
-    // 	if(rand < quantumEff) //absorb the optical photon, save the relevant data
-    // 	{
-    // 	  CreateTree::Instance()->DetectorHit[numb]++;
-    //
-    // 	  G4ThreeVector OnDetectorPosition = track->GetStep()->GetPostStepPoint()->GetPosition(); //get the position vector
-    // 	  G4ThreeVector OnDetectorMomentum = track->GetStep()->GetPostStepPoint()->GetMomentumDirection(); //get the momentum, unit vector
-    // 	  G4double globalTime = track->GetGlobalTime();
-    //
-    // 	  CreateTree::Instance()->PositionX.push_back(OnDetectorPosition.getX());
-    //           CreateTree::Instance()->PositionY.push_back(OnDetectorPosition.getY());
-    // 	  CreateTree::Instance()->PositionZ.push_back(OnDetectorPosition.getZ());
-    //
-    // 	  CreateTree::Instance()->MomentumX.push_back(OnDetectorMomentum.getX()/*/CLHEP::nm*/);
-    //           CreateTree::Instance()->MomentumY.push_back(OnDetectorMomentum.getY()/*/CLHEP::nm*/);
-    // 	  CreateTree::Instance()->MomentumZ.push_back(OnDetectorMomentum.getZ()/*/CLHEP::nm*/);
-    //
-    // 	  CreateTree::Instance()->GlobalTime.push_back(globalTime/CLHEP::ns);
-    // 	}
-    //       }
-    //     }
-    //END of standard method
   }
   else //there's only gammas and electrons. for them, we want to know where they left energy (opticalphoton don't really leave any)
   {
@@ -346,12 +296,25 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
         CreateTree::Instance()->SourceMomentumY = (Float_t) track->GetVertexMomentumDirection().getY();
         CreateTree::Instance()->SourceMomentumZ = (Float_t) track->GetVertexMomentumDirection().getZ();
 
+        CreateTree::Instance()->SourceX = (Float_t) track->GetVertexPosition().getX();
+        CreateTree::Instance()->SourceY = (Float_t) track->GetVertexPosition().getY();
+        CreateTree::Instance()->SourceZ = (Float_t) track->GetVertexPosition().getZ();
+
         std::ofstream myfile;
         myfile.open ("SourceMomentum.txt",std::ios::app);
         myfile << track->GetVertexMomentumDirection().getX() << " "
                << track->GetVertexMomentumDirection().getY() << " "
                << track->GetVertexMomentumDirection().getZ() << std::endl;
         myfile.close();
+
+        std::ofstream myfile2;
+        myfile2.open ("SourcePosition.txt",std::ios::app);
+        myfile2 << track->GetVertexPosition().getX() << " "
+                << track->GetVertexPosition().getY() << " "
+                << track->GetVertexPosition().getZ() << std::endl;
+        myfile2.close();
+
+
         CreateTree::Instance()->FoundGammaVertexMomentum = true;
       }
     }
@@ -378,35 +341,8 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
 
     if(edep != 0) //if there was en dep, save the data
     {
-
       if(materialName == "LYSO") //if the electron is interacting with the detector, it does a huge number of cherenkov
       {
-
-        //get the deposition process name
-        // 	G4OpBoundaryProcessStatus boundaryStatus=Undefined;
-        // 	static G4ThreadLocal G4OpBoundaryProcess* boundary=NULL;
-
-        //find the boundary process only once
-        // 	if(!boundary)
-        // 	{
-        // 	  G4ProcessManager* pm = track->GetDefinition()->GetProcessManager();
-        // 	  G4int nprocesses = pm->GetProcessListLength();
-        // 	  G4ProcessVector* pv = pm->GetProcessList();
-        // 	  G4int i;
-
-        // 	  for( i=0;i<nprocesses;i++)
-        // 	  {
-        // 	    if((*pv)[i]->GetProcessName()=="OpBoundary")
-        // 	    G4cout << (*pv)[i]->GetProcessType() << " " << (*pv)[i]->GetProcessName() << G4endl;
-        // 	    {
-        // 	      boundary = (G4OpBoundaryProcess*)(*pv)[i];
-        // 	      break;
-        // 	    }
-        // 	  }
-        // 	}
-        // 	boundaryStatus = boundary->GetStatus();
-
-
         //add total energy deposited
         CreateTree::Instance()->totalEnergyDeposited += edep;
         //take crystal name from physical volume
@@ -420,21 +356,14 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
         // G4cout << "CrystalName En Dep = " << CrystalName << G4endl;
         //find crystal i and j
         int iCry,jCry;
-        //now also plate num is in the PV name. Like "Crystal_0_1_2" i.e. plate = 0, i = 1, j = 2
-        //so find the first _
-
-        std::size_t foundPre = CrystalName.find_first_of("_");
-        std::string subStr1 =  CrystalName.substr(foundPre+1,CrystalName.size()-foundPre-1); //from just after the first "_"
-
-        std::size_t foundFirst = subStr1.find_first_of("_");
-        std::size_t foundLast = subStr1.find_last_of("_");
-
-        std::string iString = subStr1.substr(foundFirst+1,foundLast-foundFirst-1);
-        std::string jString = subStr1.substr(foundLast+1,subStr1.size()-foundLast-1);
-//         G4cout << "EN DEP: iString = " << iString << " , jString = " << jString << G4endl;
+        std::size_t foundFirst = CrystalName.find_first_of("_");
+        std::size_t foundLast = CrystalName.find_last_of("_");
+        std::string iString = CrystalName.substr(foundFirst+1,foundLast-foundFirst-1);
+        std::string jString = CrystalName.substr(foundLast+1,CrystalName.size()-foundLast-1);
+        // G4cout << "EN DEP: iString = " << iString << " , jString = " << jString << G4endl;
         std::istringstream ( iString ) >> iCry;
         std::istringstream ( jString ) >> jCry;
-//         G4cout << "EN DEP: iCry = " << iCry << " , jCry = " << jCry << G4endl;
+        // G4cout << "EN DEP: iCry = " << iCry << " , jCry = " << jCry << G4endl;
 
         //add energy deposited in this step to this crystal
         // CreateTree::Instance()->CryEnergyDeposited[numb].push_back(edep);
@@ -463,16 +392,28 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
           CreateTree::Instance()->FoundGammaFirstDeposition = true;
         }
 
+        std::stringstream nameOfTheParticle;
+        nameOfTheParticle << ParticleName;
+        std::stringstream nameOfTheProcess;
+        nameOfTheProcess << ProcessDefinedName;
         enDep energyDeposition;
 
+        // energyDeposition.ParticleID      =
         energyDeposition.CrystalI        = iCry;
         energyDeposition.CrystalJ        = jCry;
         energyDeposition.CrystalID       = numb;
         energyDeposition.EnergyDeposited = (Float_t) edep;
-        energyDeposition.DepositionTime  = (Float_t) globalTime;
+        energyDeposition.DepositionTime  = (Float_t) (globalTime/CLHEP::ns);
         energyDeposition.DepositionX     = (Float_t) positionVector.getX();
         energyDeposition.DepositionY     = (Float_t) positionVector.getY();
         energyDeposition.DepositionZ     = (Float_t) positionVector.getZ();
+        energyDeposition.TrackID         = TrackID;
+        energyDeposition.ParentID        = ParentID;
+        energyDeposition.ProcessName     = nameOfTheProcess.str();
+        energyDeposition.ParticleName    = nameOfTheParticle.str();
+        energyDeposition.PDGEncoding     = PDGEncoding;
+        // energyDeposition.PDGcode         = (Float_t) positionVector.getZ();
+        // energyDeposition.Process         = (Float_t) positionVector.getZ();
 
         CreateTree::Instance()->energyDeposition.push_back(energyDeposition);
       }
@@ -483,7 +424,7 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
       }
     }
   }
-
+  // G4cout << "Step end " << G4endl;
   if (ParticleName == "opticalphoton") return;
   const std::vector<const G4Track*>* secondaries =
   step->GetSecondaryInCurrentStep();

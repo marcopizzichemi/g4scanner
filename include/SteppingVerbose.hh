@@ -29,7 +29,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-class SteppingVerbose;
+class g4matrixSteppingVerbose;
 
 #ifndef SteppingVerbose_h
 #define SteppingVerbose_h 1
@@ -38,15 +38,15 @@ class SteppingVerbose;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-class SteppingVerbose : public G4SteppingVerbose
+class g4matrixSteppingVerbose : public G4SteppingVerbose
 {
- public:
+public:
 
-   SteppingVerbose();
-   virtual ~SteppingVerbose();
+  g4matrixSteppingVerbose();
+  virtual ~g4matrixSteppingVerbose();
 
-   virtual void StepInfo();
-   virtual void TrackingStarted();
+  virtual void StepInfo();
+  virtual void TrackingStarted();
 
 };
 

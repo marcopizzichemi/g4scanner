@@ -38,22 +38,43 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-StackingAction::StackingAction()
-  : G4UserStackingAction(),
-    fScintillationCounter(0), fCerenkovCounter(0)
+g4matrixStackingAction::g4matrixStackingAction()
+: G4UserStackingAction(),
+fScintillationCounter(0), fCerenkovCounter(0)
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-StackingAction::~StackingAction()
+g4matrixStackingAction::~g4matrixStackingAction()
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 G4ClassificationOfNewTrack
-StackingAction::ClassifyNewTrack(const G4Track * aTrack)
+g4matrixStackingAction::ClassifyNewTrack(const G4Track * aTrack)
 {
-  G4ClassificationOfNewTrack result(fUrgent);
+  //if it's a primary, check if it's a chargedgeantino, and if it is, keep it only if it has been generated in a material called LYSO
+  if (aTrack->GetParentID() == 0)
+  {
+    G4String ParticleName = aTrack->GetDynamicParticle()->GetParticleDefinition()->GetParticleName();
+    if(ParticleName == "chargedgeantino")
+    {
+      G4String MaterialName = aTrack->GetVolume()->GetLogicalVolume()->GetMaterial()->GetName();
+      if(MaterialName == "LYSO")
+      {
+        return fUrgent;
+      }
+      else
+      {
+        G4cout << "Primary Lu-176 killed because generated outside of LYSO material" << G4endl;
+        return fKill;
+      }
+    }
+  }
+  //kill secondary neutrino
+  if (aTrack->GetDefinition() == G4NeutrinoE::NeutrinoE()) return fKill;
+  // else return fUrgent;
+
   if(aTrack->GetDefinition() == G4OpticalPhoton::OpticalPhotonDefinition())
   { // particle is optical photon
     if(aTrack->GetParentID()>0)
@@ -61,27 +82,25 @@ StackingAction::ClassifyNewTrack(const G4Track * aTrack)
       if(aTrack->GetCreatorProcess()->GetProcessName() == "Scintillation")
         fScintillationCounter++;
       if(aTrack->GetCreatorProcess()->GetProcessName() == "Cerenkov")
-      {
-        result = fKill; //Kill Cerenkov
-      }
+        fCerenkovCounter++;
     }
   }
-  return result;
+  return fUrgent;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void StackingAction::NewStage()
+void g4matrixStackingAction::NewStage()
 {
   G4cout << "Number of Scintillation photons produced in this event : "
-         << fScintillationCounter << G4endl;
-  /*G4cout << "Number of Cerenkov photons produced in this event : "
-         << fCerenkovCounter << G4endl;*/
+  << fScintillationCounter << G4endl;
+  G4cout << "Number of Cerenkov photons produced in this event : "
+  << fCerenkovCounter << G4endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void StackingAction::PrepareNewEvent()
+void g4matrixStackingAction::PrepareNewEvent()
 {
   fScintillationCounter = 0;
   fCerenkovCounter = 0;

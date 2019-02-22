@@ -28,7 +28,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //
-//     
+//
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #ifdef G4MULTITHREADED
@@ -57,8 +57,8 @@
 
 #include <TNamed.h>
 #include <TString.h>
-#include <time.h>
 #include <TROOT.h>
+#include <time.h>
 
 #include "TRandom1.h"
 
@@ -67,10 +67,10 @@
 namespace {
   void PrintUsage() {
     G4cerr << " Usage: " << G4endl;
-    G4cerr << "  [-m macro ] [-u UIsession] [-t nThreads] [-r seed] "
-           << G4endl;
+    G4cerr << " g4scanner [-m macro ] [-u UIsession] [-t nThreads] [-r seed] "
+    << G4endl;
     G4cerr << "   note: -t option is available only for multi-threaded mode."
-           << G4endl;
+    << G4endl;
   }
 }
 
@@ -84,38 +84,37 @@ int main(int argc,char** argv)
 
   if(argc<2) {
     G4cerr << " Usage: " << G4endl;
-    G4cerr << "  <config_file> [-m macro ] [-r seed] [-o output]" << G4endl;
+    G4cerr << " g4scanner <config_file> [-m macro ] [-r seed] [-o output]" << G4endl;
     G4cerr << "   note: -m -r -o options are optional" << G4endl;
     exit(0);
   }
-  
+
   //HACK to use the dictionary easily
   std::string executable = argv[0];
   std::string execPath = executable.substr(0,executable.find_last_of("/")+1); //very platform dependent..
   std::string command = ".L " + execPath + "structDictionary.C+";
   G4cout << "command " << command << G4endl;
   gROOT->ProcessLine(command.c_str());
-  
   //----------------------------------------------------------//
   //  Parse the config file                                   //
   //----------------------------------------------------------//
-  
+
   std::cout<<"\n"<<std::endl;
-  std::cout<<"###########################################################"<<std::endl;  
+  std::cout<<"###########################################################"<<std::endl;
   std::cout<<"#                                                         #"<<std::endl;
-  std::cout<<"#           New Clear PEM matrix simulation               #"<<std::endl;  
-  std::cout<<"#                                                         #"<<std::endl;  
-  //std::cout<<"#                                                         #"<<std::endl;  
+  std::cout<<"#           New Clear PEM matrix simulation               #"<<std::endl;
+  std::cout<<"#                                                         #"<<std::endl;
   //std::cout<<"#                                                         #"<<std::endl;
-  //std::cout<<"#                                                         #"<<std::endl;  
+  //std::cout<<"#                                                         #"<<std::endl;
+  //std::cout<<"#                                                         #"<<std::endl;
   std::cout<<"###########################################################"<<std::endl;
   std::cout<<"\n\n"<<std::endl;
   std::cout<<"=====>   C O N F I G U R A T I O N   <====\n"<<std::endl;
-   
+
   //config file
   G4cout << "Configuration file: '" << argv[1] << "'"<< G4endl;
   ConfigFile config(argv[1]);
-  
+
   //output root file
   std::string filename;
   config.readInto(filename,"output");
@@ -127,13 +126,13 @@ int main(int argc,char** argv)
 
   //seed for random generator
   G4long myseed = config.read<long int>("seed");
-  
+
   //type of session
   G4String session;
-#ifdef G4MULTITHREADED
+  #ifdef G4MULTITHREADED
   G4int nThreads = 0;
-#endif
-  
+  #endif
+
   //if passed by command line, override the filename, macro and myseed (the others are not important for us)
   for (int i = 0; i < argc ; i++)
   {
@@ -141,22 +140,25 @@ int main(int argc,char** argv)
     else if(std::string(argv[i]) == std::string("-r")) myseed  = atoi(argv[i+1]);
     else if(std::string(argv[i]) == std::string("-o")) filename = argv[i+1];
   }
-  
-  if(myseed==-1) 
+
+  if(myseed==-1)
   {
-     G4cout<<"Creating random seed..."<<G4endl;   
-     myseed=CreateSeed();
+    G4cout<<"Creating random seed..."<<G4endl;
+    myseed=CreateSeed();
   }
-  
+
   G4cout << "Reading macro '" << macro << "' ..." << G4endl;
   G4cout<< "Random seed : "<< myseed <<G4endl;
   G4cout << "Output file '" << filename << ".root '..."<< G4endl;
-  
+
+
   //read scanner geometry
- 
+
+
+  //PLATES
   std::string plate_x_s,plate_y_s,plate_z_s,rotation_s;
   std::vector<std::string> plate_x_f,plate_y_f,plate_z_f,rotation_f;
-  std::vector<G4double>    plate_x,plate_y,plate_z,rotation; 
+  std::vector<G4double>    plate_x,plate_y,plate_z,rotation;
    //y is assumed to b always 0 (planar geometry
   G4int plates = config.read<int>("plates",2);
   // so we just put 0 to all y
@@ -165,7 +167,7 @@ int main(int argc,char** argv)
   G4int modules = config.read<int>("modules",1);
   G4cout << "Plates in detector: " << plates << G4endl;
   G4cout << "Modules per plate: " << modules << G4endl;
-  
+
   plate_x_s    = config.read<std::string>("plateCenterX","0");
 //   plate_y_s    = config.read<std::string>("plateCenterY",0);
   plate_z_s    = config.read<std::string>("plateCenterZ","0");
@@ -191,8 +193,10 @@ int main(int argc,char** argv)
   assert( plates == plate_x.size() );
   assert( plate_x.size() == plate_z.size() );
   assert( plate_z.size() == rotation.size() );
-  
-  
+
+
+
+
   //read crystal dimensions
   G4double crystalx = config.read<double>("crystalx");
   G4double crystaly = config.read<double>("crystaly");
@@ -200,12 +204,12 @@ int main(int argc,char** argv)
   G4cout << "Crystal x length [mm]: " << crystalx << G4endl;
   G4cout << "Crystal y length [mm]: " << crystaly << G4endl;
   G4cout << "Crystal z length [mm]: " << crystalz << G4endl;
-  
+
   G4int ncrystalx = config.read<int>("ncrystalx");
   G4int ncrystaly = config.read<int>("ncrystaly");
   G4cout << "Number crystal in x direction: " << ncrystalx << G4endl;
   G4cout << "Number crystal in y direction: " << ncrystaly << G4endl;
-  
+
   //esr thickness
   G4double esrThickness = config.read<double>("esrThickness");
   G4cout << "ESR thickness [mm]: " << esrThickness << G4endl;
@@ -221,7 +225,7 @@ int main(int argc,char** argv)
     G4cout << "Crystal(s) with back ESR " << G4endl;
   else
     G4cout << "No back ESR " << G4endl;
-  
+
   //grease front from matrix to glass
   G4double greaseFront1 = config.read<double>("greaseFront1");
   G4cout << "Grease layer between matrix and front glass [mm]: " << greaseFront1 << G4endl;
@@ -247,7 +251,7 @@ int main(int argc,char** argv)
   G4int nmppcy = config.read<int>("nmppcy");
   G4cout << "Number mppc in x direction: " << nmppcx << G4endl;
   G4cout << "Number mppcs in y direction: " << nmppcy << G4endl;
-  
+
   //grease back from matrix to glass
   G4double greaseBack = config.read<double>("greaseBack");
   G4cout << "Grease layer between matrix and back glass [mm]: " << greaseBack << G4endl;
@@ -257,7 +261,7 @@ int main(int argc,char** argv)
   //grease back from matrix to glass
   G4double airBack = config.read<double>("airBack");
   G4cout << "Air layer between back glass and esr [mm]: " << airBack << G4endl;
-  
+
   //material etc
   G4double lightyield = config.read<double>("lightyield");
   G4cout << "Scintillator Light Yield [Ph/MeV]: " << lightyield << G4endl;
@@ -267,21 +271,27 @@ int main(int argc,char** argv)
   G4double esrgapx = config.read<double>("esrgapx",0);
   G4double esrgapy = config.read<double>("esrgapy",0);
   G4double airgap = config.read<double>("airgap",0.01);
-  
+
+  G4double esrTeflonGap = config.read<double>("esrTeflonGap",0.1);
+  G4double teflonThickness = config.read<double>("teflonThickness",1.0);
+  G4double teflonReflectivity = config.read<double>("teflonReflectivity",0.98);
+  G4bool   useTeflonBox = (bool) config.read<int>("useTeflonBox",0);
+  // G4bool realdepolished = (bool) config.read<int>("realdepolished");
+
   G4double fastrisetime = config.read<double>("fastrisetime",0);   // can be optional
   G4double fastdecaytime = config.read<double>("fastdecaytime",0); // can be optional
   G4double fastratio = config.read<double>("fastratio",0);         // can be optional
   G4double slowrisetime = config.read<double>("slowrisetime");
   G4double slowdecaytime = config.read<double>("slowdecaytime");
-  
+
   // read and parse the emission spectra
   std::string default_energy = "1.77169,1.77266,1.77558,1.77851,1.78145,1.78539,1.79033,1.7963,1.80231,1.80836,1.81445,1.82058,1.82882,1.83401,1.84553,1.85293,1.86147,1.869,1.87769,1.89308,1.90536,1.92007,1.93039,1.94901,1.95846,1.9668,1.97884,1.99102,2.00088,2.01209,2.02596,2.03617,2.04519,2.0569,2.06611,2.0794,2.09151,2.10239,2.112,2.1231,2.13431,2.14565,2.15566,2.16868,2.18038,2.19519,2.21171,2.2193,2.23619,2.23464,2.24395,2.25806,2.27234,2.28358,2.29493,2.30475,2.31631,2.32463,2.33134,2.33809,2.34487,2.35856,2.36719,2.37939,2.38642,2.40238,2.41134,2.424,2.43312,2.44047,2.44786,2.46278,2.47788,2.48741,2.49317,2.49702,2.50282,2.50865,2.5145,2.52038,2.52432,2.53223,2.5362,2.54619,2.55424,2.56031,2.56437,2.57049,2.57663,2.58487,2.59317,2.59734,2.60571,2.61414,2.61414,2.61837,2.62262,2.62475,2.62902,2.63331,2.63545,2.63976,2.64191,2.64841,2.65493,2.6593,2.66149,2.66588,2.67914,2.67914,2.68136,2.68136,2.68359,2.68805,2.68805,2.68805,2.69477,2.69477,2.69702,2.70153,2.70605,2.71286,2.71742,2.71971,2.722,2.722,2.72429,2.72889,2.72889,2.73351,2.73814,2.74279,2.74512,2.74979,2.75213,2.75447,2.75917,2.75682,2.76389,2.76626,2.76389,2.76626,2.77338,2.77576,2.78533,2.79255,2.79738,2.80223,2.80466,2.80709,2.80953,2.80953,2.81934,2.8218,2.82673,2.83168,2.84164,2.84916,2.85419,2.8643,2.86684,2.87449,2.87705,2.87961,2.88475,2.88733,2.8925,2.89509,2.90028,2.90549,2.90811,2.91073,2.91335,2.91335,2.91335,2.91861,2.92125,2.92125,2.92389,2.92654,2.92654,2.92919,2.92919,2.93185,2.93451,2.93717,2.93985,2.94252,2.9452,2.94789,2.94789,2.94789,2.95058,2.95868,2.96411,2.96955,2.97228,2.97228,2.96955,2.97228,2.97502,2.97776,2.97502,2.9805,2.9805,2.9805,2.98601,2.99154,2.99431,2.99431,2.99708,2.99431,2.99708,3.00544,3.00824,3.00824,3.00824,3.00824,3.01385,3.0223,3.02797,3.03081,3.02797,3.03365,3.03081,3.03081,3.0365,3.03935,3.04221,3.04795,3.04795,3.05083,3.05371,3.05949,3.06239,3.06529,3.0682,3.06529,3.07112,3.0682,3.07696,3.08283,3.0976,3.09464,3.09464,3.10653,3.11252,3.11852,3.12757,3.13668,3.14583,3.15813,3.16741,3.17675,3.20828,3.23719,3.26664,3.28656,3.31351,3.34783,3.38287";
-  std::string default_component = "0.011691,0.011691,0.011691,0.0146138,0.0146138,0.0146138,0.011691,0.011691,0.00876827,0.00876827,0.00584551,0.00584551,0.00584551,0.00292276,0.00876827,0.0146138,0.0146138,0.0146138,0.0204593,0.023382,0.0263048,0.0204593,0.0204593,0.023382,0.0292276,0.0321503,0.0350731,0.0379958,0.0379958,0.0379958,0.0350731,0.0379958,0.0409186,0.0438413,0.0526096,0.0584551,0.0643006,0.0730689,0.0730689,0.0818372,0.0906054,0.0964509,0.0993737,0.105219,0.111065,0.122756,0.125678,0.146138,0.146138,0.160752,0.157829,0.163674,0.184134,0.192902,0.20167,0.219207,0.230898,0.242589,0.25428,0.265971,0.274739,0.292276,0.306889,0.315658,0.321503,0.350731,0.368267,0.385804,0.397495,0.415031,0.432568,0.458873,0.482255,0.496868,0.514405,0.529019,0.549478,0.564092,0.581628,0.593319,0.602088,0.616701,0.637161,0.660543,0.681002,0.71023,0.736534,0.756994,0.777453,0.806681,0.844676,0.868058,0.891441,0.9119,0.938205,0.955741,0.984969,1.0142,1.03173,1.05511,1.07557,1.11649,1.13695,1.15741,1.17495,1.19248,1.21002,1.22756,1.27432,1.2977,1.31524,1.32985,1.36785,1.40292,1.39415,1.4,1.41754,1.44092,1.47015,1.48476,1.50814,1.5286,1.54906,1.56952,1.58998,1.61921,1.63967,1.66597,1.68935,1.71566,1.73904,1.76242,1.77996,1.80042,1.8238,1.83549,1.85303,1.8618,1.87933,1.89979,1.91733,1.92902,1.95825,1.98163,2.01378,2.03424,2.0547,2.07808,2.09562,2.11023,2.12484,2.13361,2.15407,2.15699,2.15992,2.16576,2.16868,2.16868,2.16284,2.15699,2.14823,2.13946,2.12484,2.11023,2.08977,2.06639,2.04593,2.02839,2.01086,1.98455,1.96409,1.94948,1.93194,1.91733,1.90271,1.87641,1.86472,1.8501,1.83841,1.82088,1.79749,1.77119,1.75073,1.73027,1.70689,1.68058,1.65428,1.6309,1.60167,1.57244,1.55491,1.53152,1.50522,1.47891,1.45261,1.43215,1.40877,1.38831,1.362,1.33862,1.31232,1.28601,1.27432,1.25678,1.21587,1.19541,1.17203,1.14864,1.12234,1.10772,1.08434,1.06096,1.0142,0.987891,0.967432,0.938205,0.9119,0.879749,0.853445,0.82714,0.786221,0.765762,0.739457,0.716075,0.681002,0.660543,0.637161,0.60501,0.581628,0.552401,0.531942,0.505637,0.485177,0.458873,0.435491,0.412109,0.379958,0.356576,0.336117,0.309812,0.280585,0.25428,0.207516,0.175365,0.157829,0.13737,0.119833,0.0993737,0.0759916,0.0613779,0.0526096,0.0350731,0.0263048,0.011691,0.00876827,0.00876827,0.011691,0.011691,0.011691,0.00876827,0.011691"; 
-  
+  std::string default_component = "0.011691,0.011691,0.011691,0.0146138,0.0146138,0.0146138,0.011691,0.011691,0.00876827,0.00876827,0.00584551,0.00584551,0.00584551,0.00292276,0.00876827,0.0146138,0.0146138,0.0146138,0.0204593,0.023382,0.0263048,0.0204593,0.0204593,0.023382,0.0292276,0.0321503,0.0350731,0.0379958,0.0379958,0.0379958,0.0350731,0.0379958,0.0409186,0.0438413,0.0526096,0.0584551,0.0643006,0.0730689,0.0730689,0.0818372,0.0906054,0.0964509,0.0993737,0.105219,0.111065,0.122756,0.125678,0.146138,0.146138,0.160752,0.157829,0.163674,0.184134,0.192902,0.20167,0.219207,0.230898,0.242589,0.25428,0.265971,0.274739,0.292276,0.306889,0.315658,0.321503,0.350731,0.368267,0.385804,0.397495,0.415031,0.432568,0.458873,0.482255,0.496868,0.514405,0.529019,0.549478,0.564092,0.581628,0.593319,0.602088,0.616701,0.637161,0.660543,0.681002,0.71023,0.736534,0.756994,0.777453,0.806681,0.844676,0.868058,0.891441,0.9119,0.938205,0.955741,0.984969,1.0142,1.03173,1.05511,1.07557,1.11649,1.13695,1.15741,1.17495,1.19248,1.21002,1.22756,1.27432,1.2977,1.31524,1.32985,1.36785,1.40292,1.39415,1.4,1.41754,1.44092,1.47015,1.48476,1.50814,1.5286,1.54906,1.56952,1.58998,1.61921,1.63967,1.66597,1.68935,1.71566,1.73904,1.76242,1.77996,1.80042,1.8238,1.83549,1.85303,1.8618,1.87933,1.89979,1.91733,1.92902,1.95825,1.98163,2.01378,2.03424,2.0547,2.07808,2.09562,2.11023,2.12484,2.13361,2.15407,2.15699,2.15992,2.16576,2.16868,2.16868,2.16284,2.15699,2.14823,2.13946,2.12484,2.11023,2.08977,2.06639,2.04593,2.02839,2.01086,1.98455,1.96409,1.94948,1.93194,1.91733,1.90271,1.87641,1.86472,1.8501,1.83841,1.82088,1.79749,1.77119,1.75073,1.73027,1.70689,1.68058,1.65428,1.6309,1.60167,1.57244,1.55491,1.53152,1.50522,1.47891,1.45261,1.43215,1.40877,1.38831,1.362,1.33862,1.31232,1.28601,1.27432,1.25678,1.21587,1.19541,1.17203,1.14864,1.12234,1.10772,1.08434,1.06096,1.0142,0.987891,0.967432,0.938205,0.9119,0.879749,0.853445,0.82714,0.786221,0.765762,0.739457,0.716075,0.681002,0.660543,0.637161,0.60501,0.581628,0.552401,0.531942,0.505637,0.485177,0.458873,0.435491,0.412109,0.379958,0.356576,0.336117,0.309812,0.280585,0.25428,0.207516,0.175365,0.157829,0.13737,0.119833,0.0993737,0.0759916,0.0613779,0.0526096,0.0350731,0.0263048,0.011691,0.00876827,0.00876827,0.011691,0.011691,0.011691,0.00876827,0.011691";
+
   std::string fastenergy_s,fastcomponent_s,slowenergy_s,slowcomponent_s;
   std::vector <std::string> fastenergy_f,fastcomponent_f,slowenergy_f,slowcomponent_f;
   std::vector<double> fastenergy,fastcomponent,slowenergy,slowcomponent;
-  
+
   fastenergy_s    = config.read<std::string>("fastenergy",default_energy);
   fastcomponent_s = config.read<std::string>("fastcomponent",default_component);
   slowenergy_s    = config.read<std::string>("slowenergy",default_energy);
@@ -312,12 +322,12 @@ int main(int argc,char** argv)
   }
   assert( fastenergy.size() == fastcomponent.size() );
   assert( slowenergy.size() == slowcomponent.size() );
-  
+
   std::string latedepo_str;
-  
+
   std::vector <std::string> latedepo_f;
   std::vector <G4bool> LatDepoSideBySide;
-  
+
   latedepo_str    = config.read<std::string>("latdepolishedSideBySide","0,0,0,0");
   config.split( latedepo_f, latedepo_str, "," );
   for(int i = 0 ; i < latedepo_f.size() ; i++)
@@ -325,39 +335,39 @@ int main(int argc,char** argv)
     config.trim(latedepo_f[i]);
     LatDepoSideBySide.push_back((bool) atoi(latedepo_f[i].c_str()));
   }
-  
+
   //lateral depolishing
-//   G4bool latdepolished = (bool) config.read<int>("latdepolished");
+  //   G4bool latdepolished = (bool) config.read<int>("latdepolished");
   G4double latsurfaceroughness = config.read<double>("latsurfaceroughness");
   G4double latsigmaalpha = config.read<double>("latsigmaalpha");
   G4double latspecularlobe = config.read<double>("latspecularlobe");
   G4double latspecularspike = config.read<double>("latspecularspike");
   G4double latbackscattering = config.read<double>("latbackscattering");
-  G4cout << "Crystal surface finish: "; 
+  G4cout << "Crystal surface finish: ";
   for(int i = 0 ; i < LatDepoSideBySide.size() ; i++)
   {
-      G4cout << G4endl;
-      G4cout << "--------------------" << G4endl;
-      G4cout << "| Side " << i << G4endl;
-      G4cout << "--------------------" << G4endl;
-      if(LatDepoSideBySide[i])
-      {
-          
-          G4cout << "Lateral depolishing:" << G4endl;
-          G4cout << "Sigma Alpha [radiants]: " << latsigmaalpha << G4endl;
-          G4cout << "Specular Lobe:  " << latspecularlobe << G4endl;
-          G4cout << "Specular Spike: " << latspecularspike << G4endl;
-          G4cout << "Back Scattering: " << latbackscattering << G4endl;
-          if(latsurfaceroughness != 0)
-              G4cout << "Surface roughness [nm]: " << latsurfaceroughness << G4endl; 
-      }
-      else
-      {
-          G4cout << "Lateral: perfect polished" << G4endl;
-      }
-      G4cout << G4endl;
+    G4cout << G4endl;
+    G4cout << "--------------------" << G4endl;
+    G4cout << "| Side " << i << G4endl;
+    G4cout << "--------------------" << G4endl;
+    if(LatDepoSideBySide[i])
+    {
+
+      G4cout << "Lateral depolishing:" << G4endl;
+      G4cout << "Sigma Alpha [radiants]: " << latsigmaalpha << G4endl;
+      G4cout << "Specular Lobe:  " << latspecularlobe << G4endl;
+      G4cout << "Specular Spike: " << latspecularspike << G4endl;
+      G4cout << "Back Scattering: " << latbackscattering << G4endl;
+      if(latsurfaceroughness != 0)
+        G4cout << "Surface roughness [nm]: " << latsurfaceroughness << G4endl;
+    }
+    else
+    {
+      G4cout << "Lateral: perfect polished" << G4endl;
+    }
+    G4cout << G4endl;
   }
-  
+
   //front and back depolishing (for real polishing state)
   G4bool realdepolished = (bool) config.read<int>("realdepolished");
   G4double realsurfaceroughness = config.read<double>("realsurfaceroughness");
@@ -365,7 +375,7 @@ int main(int argc,char** argv)
   G4double realspecularlobe = config.read<double>("realspecularlobe");
   G4double realspecularspike = config.read<double>("realspecularspike");
   G4double realbackscattering = config.read<double>("realbackscattering");
-  G4cout << "Front and Back crystal surfaces finish: "; 
+  G4cout << "Front and Back crystal surfaces finish: ";
   if(realdepolished)
   {
     G4cout << "Front and Back depolishing:" << G4endl;
@@ -374,14 +384,14 @@ int main(int argc,char** argv)
     G4cout << "Specular Spike: " << realspecularspike << G4endl;
     G4cout << "Back Scattering: " << realbackscattering << G4endl;
     if(realsurfaceroughness != 0)
-      G4cout << "Surface roughness [nm]: " << realsurfaceroughness << G4endl; 
+      G4cout << "Surface roughness [nm]: " << realsurfaceroughness << G4endl;
   }
   else
   {
     G4cout << " Front and Back: perfect polished" << G4endl;
   }
-  
-  
+
+
   G4double esrTransmittance = config.read<double>("esrTransmittance");
   if(esrTransmittance == -1)
   {
@@ -391,150 +401,163 @@ int main(int argc,char** argv)
   {
     G4cout << "Esr transmittance fixed to " << esrTransmittance << " for all wavelenghts" << G4endl;
   }
-  
-  
+
+
   // quantum eff of the detectors
   G4double quantumEff = config.read<double>("quantumEff");
-  
-  G4cout << "Resolution Scale: " << resolutionScale << G4endl; 
-//   G4cout << "here" << G4endl;
-  G4cout << "Quantum efficiency: " << quantumEff << G4endl; 
-  
+
+  G4cout << "Resolution Scale: " << resolutionScale << G4endl;
+  //   G4cout << "here" << G4endl;
+  G4cout << "Quantum efficiency: " << quantumEff << G4endl;
+
   //distance of source from back of the module
-  G4double distance = config.read<double>("distance",0);
-  
-  
+  // G4double distance = config.read<double>("distance");
+  G4double sphereRadius = config.read<double>("sphereRadius",0);
+  G4double sourcex = config.read<double>("sourcex");
+  G4double sourcey = config.read<double>("sourcey");
+  G4double fakeAir = 0.1;  //fixed to 0.1mm, it has no physical meaning in our simulation
+  G4double sourcez = config.read<double>("sourcez");
+
+  G4double greaseIndex = config.read<double>("greaseIndex");
   // Choose the Random engine
   //
   G4Random::setTheEngine(new CLHEP::RanecuEngine);
 
   // Construct the default run manager
   //
-#ifdef G4MULTITHREADED
+  #ifdef G4MULTITHREADED
   G4MTRunManager * runManager = new G4MTRunManager;
   if ( nThreads > 0 ) runManager->SetNumberOfThreads(nThreads);
-#else
+  #else
   G4RunManager * runManager = new G4RunManager;
-#endif
+  #endif
 
   // Seed the random number generator manually
   G4Random::setTheSeed(myseed);
 
-  
+
   //create output ttree
-//   CreateTree* mytree = new CreateTree("StandardTree",ncrystalx,ncrystaly,nmppcx,nmppcy,true,true);
-  
-  
+  //   CreateTree* mytree = new CreateTree("StandardTree",ncrystalx,ncrystaly,nmppcx,nmppcy,true,true);
+
+  // CreateTree* mytree = new CreateTree("StandardTree",ncrystalx,ncrystaly,nmppcx,nmppcy);
   CreateTree* mytree = new CreateTree("StandardTree",nmppcx*modules,nmppcy*modules,plates);
   //((CreateTree*)mytree)->SetModuleElements(ncrystalx,ncrystaly,nmppcx,nmppcy);
   //mytree->SetModuleElements(ncrystalx,ncrystaly,nmppcx,nmppcy);
-  
+
   //save the seed in the ttree
   CreateTree::Instance()->Seed = myseed;
-  
+
   //create the detector construction
-  DetectorConstruction* detector = new DetectorConstruction();
-  
+  g4matrixDetectorConstruction* detector = new g4matrixDetectorConstruction();
+
   //set the parameters of detector
-  ((DetectorConstruction*)detector)->SetDetectorGeometry(plates,modules);
-  ((DetectorConstruction*)detector)->SetPlateInSpace(plate_x,plate_y,plate_z,rotation);
-  ((DetectorConstruction*)detector)->SetCrystalDimensions(crystalx,crystaly,crystalz);
-  ((DetectorConstruction*)detector)->SetNumberOfCrystals(ncrystalx,ncrystaly);
-  ((DetectorConstruction*)detector)->SetThinAirThickness(esrThickness);
-  ((DetectorConstruction*)detector)->SetLateralEsr(lateralEsr);
-  ((DetectorConstruction*)detector)->SetBackEsr(backEsr);
-  ((DetectorConstruction*)detector)->SetGreaseFrontOne(greaseFront1);
-  ((DetectorConstruction*)detector)->SetGreaseFrontTwo(greaseFront2);
-  ((DetectorConstruction*)detector)->SetGlassFront(glassFront);
-  ((DetectorConstruction*)detector)->SetEpoxy(epoxy);
-  ((DetectorConstruction*)detector)->SetMppcDimensions(mppcx,mppcy,mppcz);
-  ((DetectorConstruction*)detector)->SetMppcGap(mppcGap);
-  ((DetectorConstruction*)detector)->SetNumberOfMPPC(nmppcx,nmppcy);
-  ((DetectorConstruction*)detector)->SetGreaseBack(greaseBack);
-  ((DetectorConstruction*)detector)->SetGlassBack(glassBack);
-  ((DetectorConstruction*)detector)->SetAirBack(airBack);
-  ((DetectorConstruction*)detector)->SetLightYield(lightyield);
-  ((DetectorConstruction*)detector)->SetEsrGapX(esrgapx);
-  ((DetectorConstruction*)detector)->SetEsrGapY(esrgapy);
-  ((DetectorConstruction*)detector)->SetAirGap(airgap);
-  
-  ((DetectorConstruction*)detector)->SetLatDepoSideBySide(LatDepoSideBySide[0],LatDepoSideBySide[1],LatDepoSideBySide[2],LatDepoSideBySide[3]);
-  
-  ((DetectorConstruction*)detector)->SetFastRiseTime(fastrisetime);
-  ((DetectorConstruction*)detector)->SetFastDecayTime(fastdecaytime);
-  ((DetectorConstruction*)detector)->SetFastRatio(fastratio);
-  ((DetectorConstruction*)detector)->SetSlowRiseTime(slowrisetime);
-  ((DetectorConstruction*)detector)->SetSlowDecayTime(slowdecaytime);
-  
-  ((DetectorConstruction*)detector)->SetFastEnergy(fastenergy);
-  ((DetectorConstruction*)detector)->SetFastComponent(fastcomponent);
-  ((DetectorConstruction*)detector)->SetSlowEnergy(slowenergy);
-  ((DetectorConstruction*)detector)->SetSlowComponent(slowcomponent);
-  
-  
-//   ((DetectorConstruction*)detector)->SetLateralDepolished(latdepolished);
-  ((DetectorConstruction*)detector)->SetLateralSurfaceRoughness(latsurfaceroughness);
-  ((DetectorConstruction*)detector)->SetLateralSurfaceSigmaAlpha(latsigmaalpha);
-  ((DetectorConstruction*)detector)->SetLateralSurfaceSpecularLobe(latspecularlobe);
-  ((DetectorConstruction*)detector)->SetLateralSurfaceSpecularSpike(latspecularspike);
-  ((DetectorConstruction*)detector)->SetLateralSurfaceBackScattering(latbackscattering);
-  
-  ((DetectorConstruction*)detector)->SetRealDepolished(realdepolished);
-  ((DetectorConstruction*)detector)->SetRealSurfaceRoughness(realsurfaceroughness);
-  ((DetectorConstruction*)detector)->SetRealSurfaceSigmaAlpha(realsigmaalpha);
-  ((DetectorConstruction*)detector)->SetRealSurfaceSpecularLobe(realspecularlobe);
-  ((DetectorConstruction*)detector)->SetRealSurfaceSpecularSpike(realspecularspike);
-  ((DetectorConstruction*)detector)->SetRealSurfaceBackScattering(realbackscattering);
-  
-  
-  ((DetectorConstruction*)detector)->SetEsrTransmittance(esrTransmittance);
-  ((DetectorConstruction*)detector)->SetSourceDistance(distance);
-  ((DetectorConstruction*)detector)->SetResolutionScale(resolutionScale);
-  
+  ((g4matrixDetectorConstruction*)detector)->SetGreaseIndex(greaseIndex);
+  ((g4matrixDetectorConstruction*)detector)->SetDetectorGeometry(plates,modules);
+  ((g4matrixDetectorConstruction*)detector)->SetPlateInSpace(plate_x,plate_y,plate_z,rotation);
+  ((g4matrixDetectorConstruction*)detector)->SetCrystalDimensions(crystalx,crystaly,crystalz);
+  ((g4matrixDetectorConstruction*)detector)->SetNumberOfCrystals(ncrystalx,ncrystaly);
+  ((g4matrixDetectorConstruction*)detector)->SetThinAirThickness(esrThickness);
+  ((g4matrixDetectorConstruction*)detector)->SetLateralEsr(lateralEsr);
+  ((g4matrixDetectorConstruction*)detector)->SetBackEsr(backEsr);
+  ((g4matrixDetectorConstruction*)detector)->SetGreaseFrontOne(greaseFront1);
+  ((g4matrixDetectorConstruction*)detector)->SetGreaseFrontTwo(greaseFront2);
+  ((g4matrixDetectorConstruction*)detector)->SetGlassFront(glassFront);
+  ((g4matrixDetectorConstruction*)detector)->SetEpoxy(epoxy);
+  ((g4matrixDetectorConstruction*)detector)->SetMppcDimensions(mppcx,mppcy,mppcz);
+  ((g4matrixDetectorConstruction*)detector)->SetMppcGap(mppcGap);
+  ((g4matrixDetectorConstruction*)detector)->SetNumberOfMPPC(nmppcx,nmppcy);
+  ((g4matrixDetectorConstruction*)detector)->SetGreaseBack(greaseBack);
+  ((g4matrixDetectorConstruction*)detector)->SetGlassBack(glassBack);
+  ((g4matrixDetectorConstruction*)detector)->SetAirBack(airBack);
+  ((g4matrixDetectorConstruction*)detector)->SetLightYield(lightyield);
+  ((g4matrixDetectorConstruction*)detector)->SetEsrGapX(esrgapx);
+  ((g4matrixDetectorConstruction*)detector)->SetEsrGapY(esrgapy);
+  ((g4matrixDetectorConstruction*)detector)->SetAirGap(airgap);
+  ((g4matrixDetectorConstruction*)detector)->SetEsrTeflonGap(esrTeflonGap);
+  ((g4matrixDetectorConstruction*)detector)->SetTeflonThickness(teflonThickness);
+  ((g4matrixDetectorConstruction*)detector)->SetTeflonReflectivity(teflonReflectivity);
+  ((g4matrixDetectorConstruction*)detector)->SetUseTeflonBox(useTeflonBox);
+
+  ((g4matrixDetectorConstruction*)detector)->SetSourceRadius(sphereRadius);
+  ((g4matrixDetectorConstruction*)detector)->SetSourcePosition(sourcex,sourcey,sourcez);
+
+  ((g4matrixDetectorConstruction*)detector)->SetLatDepoSideBySide(LatDepoSideBySide[0],LatDepoSideBySide[1],LatDepoSideBySide[2],LatDepoSideBySide[3]);
+
+  ((g4matrixDetectorConstruction*)detector)->SetFastRiseTime(fastrisetime);
+  ((g4matrixDetectorConstruction*)detector)->SetFastDecayTime(fastdecaytime);
+  ((g4matrixDetectorConstruction*)detector)->SetFastRatio(fastratio);
+  ((g4matrixDetectorConstruction*)detector)->SetSlowRiseTime(slowrisetime);
+  ((g4matrixDetectorConstruction*)detector)->SetSlowDecayTime(slowdecaytime);
+
+  ((g4matrixDetectorConstruction*)detector)->SetFastEnergy(fastenergy);
+  ((g4matrixDetectorConstruction*)detector)->SetFastComponent(fastcomponent);
+  ((g4matrixDetectorConstruction*)detector)->SetSlowEnergy(slowenergy);
+  ((g4matrixDetectorConstruction*)detector)->SetSlowComponent(slowcomponent);
+
+
+  //   ((g4matrixDetectorConstruction*)detector)->SetLateralDepolished(latdepolished);
+  ((g4matrixDetectorConstruction*)detector)->SetLateralSurfaceRoughness(latsurfaceroughness);
+  ((g4matrixDetectorConstruction*)detector)->SetLateralSurfaceSigmaAlpha(latsigmaalpha);
+  ((g4matrixDetectorConstruction*)detector)->SetLateralSurfaceSpecularLobe(latspecularlobe);
+  ((g4matrixDetectorConstruction*)detector)->SetLateralSurfaceSpecularSpike(latspecularspike);
+  ((g4matrixDetectorConstruction*)detector)->SetLateralSurfaceBackScattering(latbackscattering);
+
+  ((g4matrixDetectorConstruction*)detector)->SetRealDepolished(realdepolished);
+  ((g4matrixDetectorConstruction*)detector)->SetRealSurfaceRoughness(realsurfaceroughness);
+  ((g4matrixDetectorConstruction*)detector)->SetRealSurfaceSigmaAlpha(realsigmaalpha);
+  ((g4matrixDetectorConstruction*)detector)->SetRealSurfaceSpecularLobe(realspecularlobe);
+  ((g4matrixDetectorConstruction*)detector)->SetRealSurfaceSpecularSpike(realspecularspike);
+  ((g4matrixDetectorConstruction*)detector)->SetRealSurfaceBackScattering(realbackscattering);
+
+
+  ((g4matrixDetectorConstruction*)detector)->SetEsrTransmittance(esrTransmittance);
+  // ((g4matrixDetectorConstruction*)detector)->SetSourceDistance(distance);
+  ((g4matrixDetectorConstruction*)detector)->SetResolutionScale(resolutionScale);
+
   // Set mandatory initialization classes
   //
   // Detector construction
   runManager-> SetUserInitialization(detector);
   // Physics list
-  runManager-> SetUserInitialization(new PhysicsList);
+  runManager-> SetUserInitialization(new g4matrixPhysicsList);
   // User action initialization
-  runManager->SetUserInitialization(new ActionInitialization(config));
+  runManager->SetUserInitialization(new g4matrixActionInitialization(config));
   // Initialize G4 kernel
   //
   runManager->Initialize();
 
-#ifdef G4VIS_USE
+  #ifdef G4VIS_USE
   // Initialize visualization
   //
   G4VisManager* visManager = new G4VisExecutive;
   // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
   // G4VisManager* visManager = new G4VisExecutive("Quiet");
   visManager->Initialize();
-#endif
+  #endif
 
   // Get the pointer to the User Interface manager
   //
-  G4UImanager* UImanager = G4UImanager::GetUIpointer(); 
-   
+  G4UImanager* UImanager = G4UImanager::GetUIpointer();
+
   if ( macro.size() ) {
-     // Batch mode
-     G4String command = "/control/execute ";
-     UImanager->ApplyCommand(command+macro);
+    // Batch mode
+    G4String command = "/control/execute ";
+    UImanager->ApplyCommand(command+macro);
   }
   else // Define UI session for interactive mode
   {
-#ifdef G4UI_USE
-     G4UIExecutive * ui = new G4UIExecutive(argc,argv,session);
-#ifdef G4VIS_USE
-     UImanager->ApplyCommand("/control/execute vis.mac");
-#else
-     UImanager->ApplyCommand("/control/execute .in");
-#endif
-     if (ui->IsGUI())
-        UImanager->ApplyCommand("/control/execute gui.mac");
-     ui->SessionStart();
-     delete ui;
-#endif
+    #ifdef G4UI_USE
+    G4UIExecutive * ui = new G4UIExecutive(argc,argv,session);
+    #ifdef G4VIS_USE
+    UImanager->ApplyCommand("/control/execute vis.mac");
+    #else
+    UImanager->ApplyCommand("/control/execute g4matrix.in");
+    #endif
+    if (ui->IsGUI())
+      UImanager->ApplyCommand("/control/execute gui.mac");
+    ui->SessionStart();
+    delete ui;
+    #endif
   }
 
   // Job termination
@@ -542,15 +565,15 @@ int main(int argc,char** argv)
   //                 owned and deleted by the run manager, so they should not
   //                 be deleted in the main() program !
 
-  
-  
-  
-#ifdef G4VIS_USE
+
+
+
+  #ifdef G4VIS_USE
   delete visManager;
-    
-#endif
+
+  #endif
   delete runManager;
-  
+
   //output root file
   std::stringstream outfileName;
   outfileName << filename << ".root";
@@ -561,8 +584,8 @@ int main(int argc,char** argv)
   mytree->GetTree()->Write();
   outfile->Write();
   outfile->Close();
-  
-  
+
+
   return 0;
 }
 
@@ -578,22 +601,22 @@ long int CreateSeed()
   FILE * fp = fopen ("/proc/uptime", "r");
   int uptime,upsecs;
   if (fp != NULL)
+  {
+    char buf[BUFSIZ];
+    int res;
+    char *b = fgets (buf, BUFSIZ, fp);
+    if (b == buf)
     {
-      char buf[BUFSIZ];
-      int res;
-      char *b = fgets (buf, BUFSIZ, fp);
-      if (b == buf)
-        {
-          /* The following sscanf must use the C locale.  */
-          setlocale (LC_NUMERIC, "C");
-          res = sscanf (buf, "%i", &upsecs);
-          setlocale (LC_NUMERIC, "");
-          if (res == 1)
-            uptime = (time_t) upsecs;
-        }
-
-      fclose (fp);
+      /* The following sscanf must use the C locale.  */
+      setlocale (LC_NUMERIC, "C");
+      res = sscanf (buf, "%i", &upsecs);
+      setlocale (LC_NUMERIC, "");
+      if (res == 1)
+        uptime = (time_t) upsecs;
     }
+
+    fclose (fp);
+  }
 
   std::cout<<"Uptime: "<<upsecs<<std::endl;
   ss+=upsecs;

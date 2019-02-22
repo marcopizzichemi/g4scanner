@@ -13,7 +13,7 @@ include(FindROOT.cmake)
 # The extension is already found.  Any number of sources could be listed here.
 
 set(INCLUDE_DIRECTORIES
-${ROOT_INCLUDE_DIR} 
+${ROOT_INCLUDE_DIR}
 )
 
 include_directories( ${INCLUDE_DIRECTORIES})
@@ -45,7 +45,7 @@ include(${Geant4_USE_FILE})
 #----------------------------------------------------------------------------
 # Locate sources and headers for this project
 #
-include_directories(${PROJECT_SOURCE_DIR}/include 
+include_directories(${PROJECT_SOURCE_DIR}/include
                     ${Geant4_INCLUDE_DIR})
 file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
@@ -69,6 +69,7 @@ set(g4scanner_SCRIPTS
     run.png
     vis.mac
     run.mac
+    runSingle.mac
     matrix.cfg
     structDictionary.C
   )
@@ -86,5 +87,4 @@ endforeach()
 #
 install(TARGETS g4scanner DESTINATION bin)
 set(CMAKE_BUILD_TYPE Release)
-# set (CMAKE_CXX_FLAGS "-Wvla -Wsign-compare")
-set (CMAKE_CXX_FLAGS "-W -Wall -pedantic -Wno-non-virtual-dtor -Wno-long-long -Wwrite-strings -Wpointer-arith -Woverloaded-virtual -Wno-variadic-macros -pipe -std=c++98")
+set(CMAKE_CXX_FLAGS "-W -Wall -pedantic -Wno-non-virtual-dtor -Wno-long-long -Wwrite-strings -Wpointer-arith -Woverloaded-virtual -Wno-variadic-macros -pipe -std=c++98")

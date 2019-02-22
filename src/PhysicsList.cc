@@ -25,8 +25,8 @@
 //
 // $Id$
 //
-/// \file PhysicsList.cc
-/// \brief Implementation of the PhysicsList class
+/// \file g4matrixPhysicsList.cc
+/// \brief Implementation of the g4matrixPhysicsList class
 
 #include "PhysicsList.hh"
 #include "G4SystemOfUnits.hh"
@@ -39,7 +39,7 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-PhysicsList::PhysicsList() : G4VModularPhysicsList(){
+g4matrixPhysicsList::g4matrixPhysicsList() : G4VModularPhysicsList(){
   SetVerboseLevel(1);
 
   // Default physics
@@ -52,7 +52,7 @@ PhysicsList::PhysicsList() : G4VModularPhysicsList(){
   RegisterPhysics(new G4EmStandardPhysics());
 
 
- // Optical Physics
+  // Optical Physics
   G4OpticalPhysics* opticalPhysics = new G4OpticalPhysics();
   RegisterPhysics( opticalPhysics );
 
@@ -71,13 +71,13 @@ PhysicsList::PhysicsList() : G4VModularPhysicsList(){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-PhysicsList::~PhysicsList()
-{ 
+g4matrixPhysicsList::~g4matrixPhysicsList()
+{
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void PhysicsList::SetCuts()
+void g4matrixPhysicsList::SetCuts()
 {
   G4VUserPhysicsList::SetCuts();
-}  
+}

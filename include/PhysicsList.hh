@@ -25,8 +25,8 @@
 //
 // $Id$
 //
-/// \file PhysicsList.hh
-/// \brief Definition of the PhysicsList class
+/// \file g4matrixPhysicsList.hh
+/// \brief Definition of the g4matrixPhysicsList class
 
 #ifndef PhysicsList_h
 #define PhysicsList_h 1
@@ -40,11 +40,11 @@
 /// - G4RadioactiveDecayPhysics
 /// - G4EmStandardPhysics
 
-class PhysicsList: public G4VModularPhysicsList
+class g4matrixPhysicsList: public G4VModularPhysicsList
 {
 public:
-  PhysicsList();
-  virtual ~PhysicsList();
+  g4matrixPhysicsList();
+  virtual ~g4matrixPhysicsList();
 
   virtual void SetCuts();
 };
@@ -52,4 +52,3 @@ public:
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #endif
-

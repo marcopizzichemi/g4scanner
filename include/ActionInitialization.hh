@@ -23,10 +23,10 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-// $Id: ActionInitialization.hh 68058 2013-03-13 14:47:43Z gcosmo $
+// $Id: g4matrixActionInitialization.hh 68058 2013-03-13 14:47:43Z gcosmo $
 //
-/// \file ActionInitialization.hh
-/// \brief Definition of the ActionInitialization class
+/// \file g4matrixActionInitialization.hh
+/// \brief Definition of the g4matrixActionInitialization class
 
 #ifndef ActionInitialization_h
 #define ActionInitialization_h 1
@@ -40,22 +40,22 @@ class B4DetectorConstruction;
 /// Action initialization class.
 ///
 
-class ActionInitialization : public G4VUserActionInitialization
+class g4matrixActionInitialization : public G4VUserActionInitialization
 {
-  public:
-    ActionInitialization(ConfigFile& config);
-    virtual ~ActionInitialization();
+public:
+  g4matrixActionInitialization(ConfigFile& config);
+  virtual ~g4matrixActionInitialization();
 
-    virtual void BuildForMaster() const;
-    virtual void Build() const;
+  virtual void BuildForMaster() const;
+  virtual void Build() const;
 
-    virtual G4VSteppingVerbose* InitializeSteppingVerbose() const;
-  
-  private:
-    
-    ConfigFile& fConfig;
-    
-    
+  virtual G4VSteppingVerbose* InitializeSteppingVerbose() const;
+
+private:
+
+  ConfigFile& fConfig;
+
+
 };
 
 #endif
