@@ -8,7 +8,7 @@ CreateTree* CreateTree::fInstance = NULL;
 using namespace std;
 
 CreateTree::CreateTree(TString name, int x, int y, int z)
-: 
+:
 nDetectorsX(x),
 nDetectorsY(y),
 nPlates(z)
@@ -208,7 +208,7 @@ void CreateTree::Clear()
   //   PosZEnDep[i].clear();
   // }
 
-  for (int i = 0 ; i < nDetectorsX*nDetectorsY ; i++)//
+  for (int i = 0 ; i < nDetectorsX*nDetectorsY*nPlates ; i++)//
   {
     DetectorHit[i] = 0;
   }

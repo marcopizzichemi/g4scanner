@@ -346,7 +346,7 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
         CreateTree::Instance()->SourceMomentumY = (Float_t) track->GetVertexMomentumDirection().getY();
         CreateTree::Instance()->SourceMomentumZ = (Float_t) track->GetVertexMomentumDirection().getZ();
 
-        ofstream myfile;
+        std::ofstream myfile;
         myfile.open ("SourceMomentum.txt",std::ios::app);
         myfile << track->GetVertexMomentumDirection().getX() << " "
                << track->GetVertexMomentumDirection().getY() << " "
@@ -363,7 +363,7 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
       if(!CreateTree::Instance()->FoundGammaFirstEntrance)
       {
         // G4cout << track->GetStep()->GetPreStepPoint()->GetPosition()->getX() << " " << track->GetStep()->GetPreStepPoint()->GetPosition()->getY() << std::endl;
-        ofstream myfile;
+        std::ofstream myfile;
         myfile.open ("CryEntranceXYZ.txt",std::ios::app);
         myfile << track->GetStep()->GetPreStepPoint()->GetPosition().getX() << " "
                << track->GetStep()->GetPreStepPoint()->GetPosition().getY() << " "
@@ -422,13 +422,13 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
         int iCry,jCry;
         //now also plate num is in the PV name. Like "Crystal_0_1_2" i.e. plate = 0, i = 1, j = 2
         //so find the first _
-        
+
         std::size_t foundPre = CrystalName.find_first_of("_");
         std::string subStr1 =  CrystalName.substr(foundPre+1,CrystalName.size()-foundPre-1); //from just after the first "_"
-         
+
         std::size_t foundFirst = subStr1.find_first_of("_");
         std::size_t foundLast = subStr1.find_last_of("_");
-        
+
         std::string iString = subStr1.substr(foundFirst+1,foundLast-foundFirst-1);
         std::string jString = subStr1.substr(foundLast+1,subStr1.size()-foundLast-1);
 //         G4cout << "EN DEP: iString = " << iString << " , jString = " << jString << G4endl;
@@ -451,7 +451,7 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
         if(!CreateTree::Instance()->FoundGammaFirstDeposition)
         {
           // G4cout << track->GetStep()->GetPreStepPoint()->GetPosition()->getX() << " " << track->GetStep()->GetPreStepPoint()->GetPosition()->getY() << std::endl;
-          ofstream myfile;
+          std::ofstream myfile;
           myfile.open ("EnDepositionXYZ.txt",std::ios::app);
           myfile << track->GetStep()->GetPreStepPoint()->GetPosition().getX() << " "
                  << track->GetStep()->GetPreStepPoint()->GetPosition().getY() << " "

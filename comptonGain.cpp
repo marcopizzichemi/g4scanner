@@ -1072,13 +1072,13 @@ int main (int argc, char** argv)
     {
       totalDepositionCounter++;
       //FIXME hardcoded for now
-      int crystalsPerArray = 64;
+      int crystalsPerArray = 1600;
       if(averageDepEvents.size() == 1) singleCounter++; // only one crystal hit, but impossible if totalEnergyDeposited > 1 MeV (we shoot only 2 x 511KeV back to back..)
       if(averageDepEvents.size() == 2)  // two crystals hit in total, it has to be 511 in one and 511 in the other, since totalEnergyDeposited > 1 MeV
       {
         //just check that the 2 are in two different arrays... as it should be
-        int array0 = averageDepEvents[0].id / crystalsPerArray;
-        int array1 = averageDepEvents[1].id / crystalsPerArray;
+        int array0 = averageDepEvents.at(0).id / crystalsPerArray;
+        int array1 = averageDepEvents.at(1).id / crystalsPerArray;
         if(array0 == array1 ) std::cout << "same array for both 511 KeV depositions???" << std::endl;
         doubleCounter++;
       }
@@ -1088,9 +1088,9 @@ int main (int argc, char** argv)
         std::vector<float> hitEnergy[2];
         for(int iAverage = 0 ; iAverage < averageDepEvents.size(); iAverage++)
         {
-          hit[(averageDepEvents[iAverage].id / crystalsPerArray)]++;
-          hitTime[(averageDepEvents[iAverage].id / crystalsPerArray)].push_back(averageDepEvents[iAverage].time);
-          hitEnergy[(averageDepEvents[iAverage].id / crystalsPerArray)].push_back(averageDepEvents[iAverage].energy);
+          hit[(averageDepEvents.at(iAverage).id / crystalsPerArray)]++;
+          hitTime[(averageDepEvents.at(iAverage).id / crystalsPerArray)].push_back(averageDepEvents.at(iAverage).time);
+          hitEnergy[(averageDepEvents.at(iAverage).id / crystalsPerArray)].push_back(averageDepEvents.at(iAverage).energy);
         }
 
         if( ((hit[0] == 1) && (hit[1] == 2)) || ((hit[0] == 2) && (hit[1] == 1))  )
@@ -1104,16 +1104,16 @@ int main (int argc, char** argv)
           {
             if(hit[iHit] == 2)
             {
-              if(hitTime[iHit][0] > hitTime[iHit][1])
+              if(hitTime[iHit].at(0) > hitTime[iHit].at(1))
               {
-                if(hitEnergy[iHit][0] > hitEnergy[iHit][1] )
+                if(hitEnergy[iHit].at(0) > hitEnergy[iHit].at(1) )
                   HighestCrystalWrong++;
                 else
                   HighestCrystalRight++;
               }
               else
               {
-                if(hitEnergy[iHit][0] > hitEnergy[iHit][1] )
+                if(hitEnergy[iHit].at(0) > hitEnergy[iHit].at(1) )
                   HighestCrystalRight++;
                 else
                   HighestCrystalWrong++;
