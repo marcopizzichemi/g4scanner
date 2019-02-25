@@ -518,9 +518,10 @@ int main (int argc, char** argv)
   float *xmppc;
   float *ymppc;
   float *zmppc;
-  xmppc = new float[numOfCh];
-  ymppc = new float[numOfCh];
-  zmppc = new float[numOfCh];
+  int nSipms = 2*nmppcx*nmppcy;
+  xmppc = new float[nSipms];
+  ymppc = new float[nSipms];
+  zmppc = new float[nSipms];
 
 
   // nmppcx*nmppcy should be half of numOfCh
@@ -585,12 +586,12 @@ int main (int argc, char** argv)
 
 
   sipm_t* sipm;
-  sipm = new sipm_t[numOfCh];
+  sipm = new sipm_t[nSipms];
   TRandom3 *rand = new TRandom3(0);
   //initialize spads
   //they are in the same order of ch0, ch1, etc..
   //FIXME not general at all!!!
-  for(int i = 0 ; i < numOfCh ; i++)
+  for(int i = 0 ; i < nSipms ; i++)
   {
 
     //set position of he sipm
@@ -614,17 +615,17 @@ int main (int argc, char** argv)
     //set count to 0
     sipm[i].counts = 0;
   }
-  // for(int iSipm = 0; iSipm < numOfCh ; iSipm++)
-  // {
-  //   std::cout << iSipm << " "
-  //             << sipm[iSipm].detx - det_size_x/2.0 << " "
-  //             << sipm[iSipm].detx + det_size_x/2.0 << " "
-  //             << sipm[iSipm].dety - det_size_y/2.0 << " "
-  //             << sipm[iSipm].dety + det_size_y/2.0 << " "
-  //             << sipm[iSipm].detz - det_size_z/2.0 << " "
-  //             << sipm[iSipm].detz + det_size_z/2.0 << " "
-  //             << std::endl;
-  // }
+  for(int iSipm = 0; iSipm < nSipms ; iSipm++)
+  {
+    std::cout << iSipm << " "
+              << sipm[iSipm].detx - det_size_x/2.0 << " "
+              << sipm[iSipm].detx + det_size_x/2.0 << " "
+              << sipm[iSipm].dety - det_size_y/2.0 << " "
+              << sipm[iSipm].dety + det_size_y/2.0 << " "
+              << sipm[iSipm].detz - det_size_z/2.0 << " "
+              << sipm[iSipm].detz + det_size_z/2.0 << " "
+              << std::endl;
+  }
 
   //----------------------------------------//
   //             LOOP ON EVENTS             //
@@ -649,7 +650,7 @@ int main (int argc, char** argv)
     for(int iPhot = 0; iPhot < photons->size(); iPhot++) // run on all opticals
     {
       // find which sipm was hit
-      for(int iSipm = 0; iSipm < numOfCh ; iSipm++) //run on all sipms
+      for(int iSipm = 0; iSipm < nSipms ; iSipm++) //run on all sipms
       {
         if((photons->at(iPhot).PositionX > (sipm[iSipm].detx - det_size_x/2.0 )) && (photons->at(iPhot).PositionX < (sipm[iSipm].detx + det_size_x/2.0 )) ) // within the x limits of this sipm
         {
@@ -727,7 +728,7 @@ int main (int argc, char** argv)
       }
     }
     // calculate the global sipm parameters
-    for(int i = 0; i < numOfCh ; i++)
+    for(int i = 0; i < nSipms ; i++)
     {
       // fill the charge vector
       charge[i] = (UShort_t) sipm[i].counts;
@@ -750,7 +751,7 @@ int main (int argc, char** argv)
 
 
     // re-initialize the sipms counters
-    for(int i = 0 ; i < numOfCh ; i++)
+    for(int i = 0; i < nSipms ; i++)
     {
       //fill the array of spads with 0s
       for(int iSpad = 0; iSpad < n_spad_x; iSpad++)
@@ -826,7 +827,7 @@ int main (int argc, char** argv)
   fOut->Close();
 
   //free memory
-  for(int i = 0 ; i < numOfCh ; i++)
+  for(int i = 0; i < nSipms ; i++)
   {
     for(int j = 0; j < n_spad_x; j++)
     {
