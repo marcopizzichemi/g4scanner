@@ -1,7 +1,6 @@
 // compile with
 // g++ -o ../build/simToTree simToTree.cpp `root-config --cflags --glibs` && cp structDictionary.C ../build/
 // syntax
-// simRead_base `ls out*`
 
 #include "TROOT.h"
 #include "TTree.h"
@@ -74,6 +73,7 @@ void usage()
             << "\t\t" << "[ [-p|--prefix] <input prefix>     prefix of input files] " << std::endl
             << "\t\t" << "[ [-o|--output] <output file>      output file name] " << std::endl
             << "\t\t" << "[ --photons <N>       average time on first N photons - default = 5]" << std::endl
+            << "\t\t" << "[ --strategy <N>      strategy to calc sipm timestamp. 0 = k-th timestamp, 1 = avg of first k timestamps. k defined by --photons     - default = 1]" << std::endl
             << "\t\t" << "[ --saturation        flag to use saturation of sipms ] " << std::endl
             << "\t\t" << "[ --nmppcx <N>        number of sipms in x             - default = 4]" << std::endl
             << "\t\t" << "[ --nmppcy <N>        number of sipms in y             - default = 4]" << std::endl
@@ -88,6 +88,7 @@ void usage()
             << "\t\t" << "[ --qe <N>            quantum efficiency of sipms  - default = 1]" << std::endl
             << "\t\t" << "[ --sptr <N>          sigma sptr of the detector   - default = 0.087]" << std::endl
             << "\t\t" << "[ --daqChs <N>        fixed numb of channles of DAQ - default = -1 (i.e. ch read by input file)]" << std::endl
+
 
 
             << "\t\t" << std::endl;
@@ -162,6 +163,8 @@ int main (int argc, char** argv)
   double det_size_y = 2.9;
   double det_size_z = 0.01; //fixed
 
+  int strategy = 1; // 0 = k-th photons, 1 = avg on first k photons
+
   std::string inputFolderName = "./";
   std::string inputFilePrefix = "";
   // std::string outputFileName = "outputBareboneFile.root";
@@ -189,6 +192,7 @@ int main (int argc, char** argv)
       { "folder", required_argument, 0, 0 },
       { "prefix", required_argument, 0, 0 },
       { "output", required_argument, 0, 0 },
+      { "strategy", required_argument, 0, 0 },
 			{ NULL, 0, 0, 0 }
 	};
 
@@ -267,6 +271,9 @@ int main (int argc, char** argv)
       outputFileName = (char *)optarg;
       outputGiven = true;
     }
+    else if (c == 0 && optionIndex == 18){
+      strategy = atoi((char *)optarg);
+    }
 		else {
       std::cout	<< "Usage: " << argv[0] << std::endl;
 			usage();
@@ -318,6 +325,7 @@ int main (int argc, char** argv)
   std::cout << "nDeadSpadY               = " << n_dead_spad_y << std::endl;
   std::cout << "detSizeX                 = " << det_size_x << std::endl;
   std::cout << "detSizeY                 = " << det_size_y << std::endl;
+  std::cout << "strategy                 = " << strategy << std::endl;
 
 
   std::cout << "Time average on first " << numb_of_phot_for_time_average << " photons"<< std::endl;
@@ -728,27 +736,50 @@ int main (int argc, char** argv)
       }
     }
     // calculate the global sipm parameters
+    // for each sipm, the timestamps need to be smeared by sptr, then ordered.
+    // then we can chose between k-th timestamp and average of the first k timestamps
     for(int i = 0; i < nSipms ; i++)
     {
       // fill the charge vector
       charge[i] = (UShort_t) sipm[i].counts;
-      // calculate the sipm timestamp from average of first N timestamps
+
       sipm[i].timestamp = 0.0;
-      int effectiveN = numb_of_phot_for_time_average;
-      if(numb_of_phot_for_time_average > sipm[i].listOfTimestamps.size())
-        effectiveN = sipm[i].listOfTimestamps.size();
-      for(int j = 0 ; j < effectiveN; j++)
+      //ignore everything if there is no timestamp recorded on this detector
+      if(sipm[i].listOfTimestamps.size() > 0)
       {
-        sipm[i].timestamp +=  (Float_t) ((gRandom->Gaus(sipm[i].listOfTimestamps[j],sigmaSPTR) / effectiveN)*1e-9); // default smearing at 0.087, and convert to seconds
+        // calculate the real sipm timestamp
+        // first, smear all recorded timestamps using the sptr of the detector
+        for(int j = 0 ; j < sipm[i].listOfTimestamps.size(); j++)
+        {
+          sipm[i].listOfTimestamps[j] = (Float_t) gRandom->Gaus(sipm[i].listOfTimestamps[j],sigmaSPTR); // default smearing is at 0.087 ns
+        }
+
+        // then, order the listOfTimestamps
+        std::sort(sipm[i].listOfTimestamps.begin(),sipm[i].listOfTimestamps.end());
+
+        // set the k number, checking that it is not greater than the number of timestamps available
+        int effectiveN = numb_of_phot_for_time_average;
+        if(numb_of_phot_for_time_average > sipm[i].listOfTimestamps.size())
+        {
+          effectiveN = sipm[i].listOfTimestamps.size();
+        }
+
+        // calc the timestamp using the chosen strategy
+        if(strategy == 0) // take just k-th timestamp
+        {
+          sipm[i].timestamp = sipm[i].listOfTimestamps[effectiveN-1]*1e-9; // convert to seconds
+        }
+        else // avg on first k timestamps
+        {
+          for(int j = 0 ; j < effectiveN; j++)
+          {
+            sipm[i].timestamp +=  (Float_t) ((sipm[i].listOfTimestamps[j] / effectiveN)*1e-9); // avg and convert to seconds
+          }
+        }
       }
+      // store the timestamp
       timestamp[i] = (Float_t) sipm[i].timestamp;
     }
-
-    // 0.087
-
-
-
-
 
     // re-initialize the sipms counters
     for(int i = 0; i < nSipms ; i++)
